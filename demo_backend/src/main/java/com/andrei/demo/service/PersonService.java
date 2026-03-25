@@ -27,6 +27,7 @@ public class PersonService {
         person.setAge(personDTO.getAge());
         person.setEmail(personDTO.getEmail());
         person.setPassword(personDTO.getPassword());
+        person.setRole(personDTO.getRole());
 
         return personRepository.save(person);
     }
@@ -56,6 +57,7 @@ public class PersonService {
                             existingPerson.setAge(person.getAge());
                             existingPerson.setEmail(person.getEmail());
                             existingPerson.setPassword(person.getPassword());
+                            existingPerson.setRole(person.getRole());
                             return personRepository.save(existingPerson);
                         })
                         .orElseThrow(

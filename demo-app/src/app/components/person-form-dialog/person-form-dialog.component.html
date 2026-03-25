@@ -55,9 +55,22 @@
           <mat-error>Password is required.</mat-error>
         }
       </mat-form-field>
+
+      <mat-form-field appearance="fill">
+      <mat-label>Role</mat-label>
+      <mat-select formControlName="role">
+        <mat-option value="ADMIN">Admin</mat-option>
+        <mat-option value="CUSTOMER">Customer</mat-option>
+      </mat-select>
+      <mat-error *ngIf="form.get('role')?.hasError('required')">
+        Role is required
+      </mat-error>
+    </mat-form-field>
     }
   </form>
 </mat-dialog-content>
+
+
 
 <mat-dialog-actions align="end">
   <button mat-button type="button" (click)="cancel()">Cancel</button>
