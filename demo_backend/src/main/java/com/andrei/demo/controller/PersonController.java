@@ -33,10 +33,10 @@ public class PersonController {
         return personService.getPersonByEmail(email);
     }
 
+
     @PostMapping("/person")
-    public Person addPerson(
-            @Valid @RequestBody PersonCreateDTO personDTO
-    ) {
+    public Person addPerson(@Valid @RequestBody PersonCreateDTO personDTO)
+            throws ValidationException { // Add this line
         return personService.addPerson(personDTO);
     }
 

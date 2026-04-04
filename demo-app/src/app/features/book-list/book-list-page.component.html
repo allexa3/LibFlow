@@ -1,0 +1,59 @@
+<mat-toolbar color="primary">
+  <span>Library Admin</span>
+  <nav class="nav-links">
+    <a mat-button routerLink="/persons" routerLinkActive="active-link">People</a>
+    <a mat-button routerLink="/books" routerLinkActive="active-link">Books</a>
+    <a mat-button routerLink="/genres" routerLinkActive="active-link">Genres</a>
+  </nav>
+</mat-toolbar>
+
+<main class="content">
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">Manage Books</h1>
+      <p class="page-subtitle">View, create, and delete book records.</p>
+    </div>
+    <button mat-flat-button (click)="openCreateDialog()" [disabled]="isLoading()">
+      <mat-icon>add</mat-icon>
+      New Book
+    </button>
+  </header>
+
+  <div class="table-container" [class.is-busy]="isLoading()">
+    <table mat-table [dataSource]="books()">
+      <ng-container matColumnDef="title">
+        <th mat-header-cell *matHeaderCellDef>Title</th>
+        <td mat-cell *matCellDef="let book">{{ book.title }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="isbn">
+        <th mat-header-cell *matHeaderCellDef>ISBN</th>
+        <td mat-cell *matCellDef="let book">{{ book.isbn }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <td mat-cell *matCellDef="let book">
+          <button
+            mat-icon-button
+            color="warn"
+            (click)="openDeleteDialog(book)"
+            [attr.aria-label]="'Delete ' + book.title"
+            [disabled]="isLoading()"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+      <tr class="mat-mdc-row" *matNoDataRow>
+        <td [attr.colspan]="displayedColumns.length" class="no-data-cell">
+          No books found. Click "New Book" to add one.
+        </td>
+      </tr>
+    </table>
+  </div>
+</main>

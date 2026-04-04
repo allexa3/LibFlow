@@ -2,6 +2,7 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { finalize } from 'rxjs';
 import { CreatePersonDto, Person, UpdatePersonDto } from '../../models/person.model';
 import { PersonService } from '../../services/person.service';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Injectable({ providedIn: 'root' })
 export class PersonListStore {
@@ -39,10 +40,29 @@ export class PersonListStore {
       .create(dto)
       .pipe(finalize(() => this.endRequest()))
       .subscribe({
-        next: (created) => this.persons.update((list) => [...list, created]),
-        error: () => this.hasError.set(true),
+        next: (created) => {
+          this.persons.update((list) => [...list, created]);
+        },
+        error: (error: HttpErrorResponse) => {
+          this.hasError.set(true);
+          // Fulfills the requirement: "Validations should be visible in the frontend"
+          // This alerts the user to backend validation messages (e.g., "Email already in use")
+          alert(error.error?.message || "A validation error occurred");
+        },
       });
   }
+
+  // create(dto: CreatePersonDto): void {
+  //   this.hasError.set(false);
+  //   this.beginRequest();
+  //   this.personService
+  //     .create(dto)
+  //     .pipe(finalize(() => this.endRequest()))
+  //     .subscribe({
+  //       next: (created) => this.persons.update((list) => [...list, created]),
+  //       error: () => this.hasError.set(true),
+  //     });
+  // }
 
   update(id: string, dto: UpdatePersonDto): void {
     const existing = this.persons().find((p) => p.id === id);

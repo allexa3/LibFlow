@@ -1,0 +1,36 @@
+<h2 mat-dialog-title>{{ data.title }}</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" (ngSubmit)="submit()" class="form-layout">
+    <mat-form-field appearance="outline">
+      <mat-label>Title</mat-label>
+      <input matInput formControlName="title" placeholder="Enter book title" />
+      @if (form.get('title')?.hasError('required') && form.get('title')?.touched) {
+        <mat-error>Title is required</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>ISBN</mat-label>
+      <input matInput formControlName="isbn" placeholder="Enter ISBN (10-13 digits)" />
+      @if (form.get('isbn')?.hasError('required') && form.get('isbn')?.touched) {
+        <mat-error>ISBN is required</mat-error>
+      }
+      @if ((form.get('isbn')?.hasError('minlength') || form.get('isbn')?.hasError('maxlength')) && form.get('isbn')?.touched) {
+        <mat-error>ISBN must be between 10 and 13 characters</mat-error>
+      }
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">Cancel</button>
+  <button
+    mat-flat-button
+    color="primary"
+    (click)="submit()"
+    [disabled]="form.invalid"
+  >
+    {{ data.submitLabel || 'Submit' }}
+  </button>
+</mat-dialog-actions>

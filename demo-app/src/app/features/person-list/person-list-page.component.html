@@ -1,5 +1,19 @@
-<mat-toolbar color="primary">
-  <span>Person Manager</span>
+<mat-toolbar color="primary" class="main-toolbar">
+  <div class="toolbar-content">
+    <span class="brand">Library Admin</span>
+    
+    <nav class="nav-links">
+      <a mat-button routerLink="/persons" routerLinkActive="active-link">
+        <mat-icon>people</mat-icon> People
+      </a>
+      <a mat-button routerLink="/books" routerLinkActive="active-link">
+        <mat-icon>book</mat-icon> Books
+      </a>
+      <a mat-button routerLink="/genres" routerLinkActive="active-link">
+        <mat-icon>category</mat-icon> Genres
+      </a>
+    </nav>
+  </div>
 </mat-toolbar>
 <main class="content">
   <header class="page-header">
@@ -7,15 +21,17 @@
       <h1 class="page-title">Manage People</h1>
       <p class="page-subtitle">View, create, edit, and delete person records.</p>
     </div>
-    <button
-      mat-flat-button
-      (click)="openCreateDialog()"
-      aria-label="Add new person"
-      [disabled]="isLoading()"
-    >
-      <mat-icon>add</mat-icon>
-      New Person
-    </button>
+    <div class="header-actions">
+      <button
+        mat-flat-button
+        (click)="openCreateDialog()"
+        aria-label="Add new person"
+        [disabled]="isLoading()"
+      >
+        <mat-icon>person_add</mat-icon>
+        New Person
+      </button>
+    </div>
   </header>
 
   @if (isLoading()) {

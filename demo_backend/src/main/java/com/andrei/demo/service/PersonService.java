@@ -20,7 +20,12 @@ public class PersonService {
         return personRepository.findAll();
     }
 
-    public Person addPerson(PersonCreateDTO personDTO) {
+
+    public Person addPerson(PersonCreateDTO personDTO) throws ValidationException {
+        // Manually handle duplicate email edge case
+        if (personRepository.findByEmail(personDTO.getEmail()).isPresent()) {
+            throw new ValidationException("Email " + personDTO.getEmail() + " is already in use.");
+        }
         Person person = new Person();
 
         person.setName(personDTO.getName());
