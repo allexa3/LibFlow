@@ -1,13 +1,12 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Book } from '../models/book.model';
+import { Book, CreateBookDto } from '../models/book.model'; // Ensure CreateBookDto is imported
+
+
 
 @Injectable({ providedIn: 'root' })
 export class BookService {
-  create(arg0: { title: string; isbn: string; }) {
-      throw new Error('Method not implemented.');
-  }
   private readonly http = inject(HttpClient);
   private readonly url = 'http://localhost:8080/books';
 
@@ -15,7 +14,11 @@ export class BookService {
     return this.http.get<Book[]>(this.url);
   }
 
-  // Example of using the PATCH method
+  // FIXED: Implementation of create method
+  create(dto: CreateBookDto): Observable<Book> {
+    return this.http.post<Book>(this.url, dto);
+  }
+
   patch(id: string, updates: Partial<Book>): Observable<Book> {
     return this.http.patch<Book>(`${this.url}/${id}`, updates);
   }
