@@ -1,5 +1,6 @@
 package com.andrei.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.util.List;
@@ -16,5 +17,6 @@ public class Genre {
     private String name;
 
     @ManyToMany(mappedBy = "genres")
-    private List<Book> books; // Inverse side of the n:m relationship
+    @JsonIgnore // Prevents the infinite loop that crashes the frontend fetch
+    private List<Book> books;
 }

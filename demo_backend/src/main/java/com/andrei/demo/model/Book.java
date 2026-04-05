@@ -5,6 +5,7 @@ import lombok.Data;
 import java.util.List;
 import java.util.UUID;
 
+// src/main/java/com/andrei/demo/model/Book.java
 @Entity
 @Data
 public class Book {
@@ -18,7 +19,8 @@ public class Book {
 
     @ManyToOne
     @JoinColumn(name = "person_id")
-    private Person borrowedBy; // 1:n relationship
+    // This naming must match what the frontend expects (borrowedBy)
+    private Person borrowedBy;
 
     @ManyToMany
     @JoinTable(
@@ -26,5 +28,5 @@ public class Book {
             joinColumns = @JoinColumn(name = "book_id"),
             inverseJoinColumns = @JoinColumn(name = "genre_id")
     )
-    private List<Genre> genres; // n:m Relationship
+    private List<Genre> genres;
 }

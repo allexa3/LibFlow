@@ -9,7 +9,7 @@ export class BookService {
       throw new Error('Method not implemented.');
   }
   private readonly http = inject(HttpClient);
-  private readonly url = 'http://localhost:8080/book';
+  private readonly url = 'http://localhost:8080/books';
 
   getAll(): Observable<Book[]> {
     return this.http.get<Book[]>(this.url);

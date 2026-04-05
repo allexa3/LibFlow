@@ -10,23 +10,28 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select'; // Required for mat-select
-import { MatOptionModule } from '@angular/material/core';   // Required for mat-option
+import { MatOptionModule } from '@angular/material/core';   // Required for mat-option
 import { PersonService } from '../../services/person.service';
 import { Person } from '../../models/person.model';
-
-export interface BookFormDialogData {
-  title: string;
-  submitLabel?: string;
-  initialValue?: BookFormValue | null;
-}
+import { GenreService } from '../../services/genre.service'; // Ensure this exists
+import { Genre } from '../../models/genre.model';
 
 export interface BookFormValue {
   title: string;
   authorName: string;
   isbn: string;
+  personId: string; // Add this
+  genreIds: string[];
 }
 
+// Change initialValue to 'any' or your 'Book' model to allow .genres access
+export interface BookFormDialogData {
+  title: string;
+  submitLabel?: string;
+  initialValue?: any | null; 
+}
 export type BookFormDialogResult = BookFormValue | undefined;
+
 
 @Component({
   selector: 'app-book-form-dialog',
@@ -51,20 +56,28 @@ export class BookFormDialogComponent implements OnInit {
   protected readonly data = inject<BookFormDialogData>(MAT_DIALOG_DATA);
   private readonly personService = inject(PersonService);
   protected people: Person[] = []; // Store list of people for the dropdown
+  private readonly genreService = inject(GenreService);
+  protected genres: Genre[] = []; // List for the multi-select dropdown
 
   protected readonly form = this.fb.nonNullable.group({
     title: ['', [Validators.required, Validators.minLength(2)]],
     authorName: ['', [Validators.required]],
     isbn: ['', [Validators.required, Validators.pattern(/^(978|979)[0-9]{10}$/)]],
-    personId: ['', [Validators.required]] // Matches Java DTO
+    personId: ['', [Validators.required]],
+    genreIds: [[] as string[], [Validators.required]] // Added for n:m relationship
   });
 
   ngOnInit(): void {
-    // Fetch people so we can link a book to a person (1:n)
+    // Fetch both People and Genres
     this.personService.getAll().subscribe(data => this.people = data);
-    
+    this.genreService.getAll().subscribe(data => this.genres = data);
+
     if (this.data.initialValue) {
-      this.form.patchValue(this.data.initialValue);
+      this.form.patchValue({
+        ...this.data.initialValue,
+        // Map existing genres back to IDs for the form
+        genreIds: this.data.initialValue.genres?.map((g: any) => g.id) || []
+      });
     }
   }
 
@@ -82,5 +95,3 @@ export class BookFormDialogComponent implements OnInit {
     this.dialogRef.close(undefined);
   }
 }
-
-

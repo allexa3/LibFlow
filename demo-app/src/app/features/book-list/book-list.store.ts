@@ -8,42 +8,37 @@ import { BookService } from '../../services/book.service';
 export class BookListStore {
   private readonly bookService = inject(BookService);
   private readonly pendingRequests = signal(0);
-  
+
   // Create signals for data and error state
   readonly books = signal<Book[]>([]);
   readonly hasError = signal<boolean>(false); // Added missing signal
   readonly isLoading = computed(() => this.pendingRequests() > 0);
-  
 
-  private beginRequest() { 
-    this.pendingRequests.update(c => c + 1); 
+
+  private beginRequest() {
+    this.pendingRequests.update(c => c + 1);
     this.hasError.set(false); // Reset error on new request
   }
-  
-  private endRequest() { 
-    this.pendingRequests.update(c => Math.max(0, c - 1)); 
+
+  private endRequest() {
+    this.pendingRequests.update(c => Math.max(0, c - 1));
   }
 
- load(): void {
-
-    this.beginRequest();
-
-    const request$ = this.bookService.getAll() as unknown as Observable<Book[]>;
-
-    request$
-
-      .pipe(finalize(() => this.endRequest()))
-
-      .subscribe({
-
-        next: (data) => this.books.set(data),
-
-        error: () => alert("Failed to load books")
-
-      });
-
+  load(): void {
+    this.beginRequest(); // Sets loading to true
+    this.bookService.getAll().subscribe({
+      next: (data) => {
+        console.log('Data received from backend:', data); // CHECK THIS IN F12 CONSOLE
+        this.books.set(data);
+        this.endRequest(); // Sets loading to false
+      },
+      error: (err) => {
+        console.error('Frontend Error:', err);
+        this.hasError.set(true);
+        this.endRequest();
+      }
+    });
   }
-
 
 
   create(dto: CreateBookDto): void {
@@ -103,15 +98,15 @@ export class BookListStore {
   }
 
   update(id: string, dto: Partial<CreateBookDto>): void {
-  this.beginRequest();
-  this.bookService.patch(id, dto) // Calls @PatchMapping in Java
-    .pipe(finalize(() => this.endRequest()))
-    .subscribe({
-      next: (updated) => {
-        this.books.update(list => list.map(b => b.id === id ? updated : b));
-      },
-      error: (err) => alert(err.error?.message || "Update failed")
-    });
-}
+    this.beginRequest();
+    this.bookService.patch(id, dto) // Calls @PatchMapping in Java
+      .pipe(finalize(() => this.endRequest()))
+      .subscribe({
+        next: (updated) => {
+          this.books.update(list => list.map(b => b.id === id ? updated : b));
+        },
+        error: (err) => alert(err.error?.message || "Update failed")
+      });
+  }
 
 }

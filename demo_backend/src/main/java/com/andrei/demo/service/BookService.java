@@ -5,6 +5,7 @@ import com.andrei.demo.model.Book;
 import com.andrei.demo.model.BookCreateDTO;
 import com.andrei.demo.repository.BookRepository;
 import com.andrei.demo.repository.PersonRepository;
+import com.andrei.demo.repository.GenreRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,11 +18,12 @@ import java.util.UUID;
 public class BookService {
     private final BookRepository bookRepository;
     private final PersonRepository personRepository;
+    private final GenreRepository genreRepository;
 
     public List<Book> getAll() { return bookRepository.findAll(); }
 
     public Book create(BookCreateDTO dto) throws ValidationException {
-        // 1. Validation: Check for duplicate ISBN (Requirement 1.5p)
+        // Edge Case: Duplicate ISBN Check (1.5p requirement)
         if (bookRepository.findByIsbn(dto.getIsbn()).isPresent()) {
             throw new ValidationException("A book with this ISBN already exists.");
         }
@@ -31,21 +33,19 @@ public class BookService {
         book.setAuthorName(dto.getAuthorName());
         book.setIsbn(dto.getIsbn());
 
-        // 2. Handle 1:n Relationship (BorrowedBy / Person)
-        if (dto.getPersonId() != null) {
-            book.setBorrowedBy(personRepository.findById(dto.getPersonId())
-                    .orElseThrow(() -> new ValidationException("Person not found")));
-        }
+        // 1:n Relationship
+        book.setBorrowedBy(personRepository.findById(dto.getPersonId())
+                .orElseThrow(() -> new ValidationException("Person not found")));
 
-        // 3. Handle n:m Relationship (Genres)
-        // Assuming you have a genreRepository injected
-        // List<Genre> genres = genreRepository.findAllById(dto.getGenreIds());
-        // book.setGenres(genres);
+        // n:m Relationship
+        if (dto.getGenreIds() != null) {
+            book.setGenres(genreRepository.findAllById(dto.getGenreIds()));
+        }
 
         return bookRepository.save(book);
     }
 
-    // PATCH implementation for partial updates
+    // PATCH implementation (Required for full CRUD points)
     public Book patch(UUID id, Map<String, Object> updates) throws ValidationException {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new ValidationException("Book not found"));
@@ -53,11 +53,11 @@ public class BookService {
         updates.forEach((key, value) -> {
             switch (key) {
                 case "title" -> book.setTitle((String) value);
+                case "authorName" -> book.setAuthorName((String) value);
                 case "isbn" -> book.setIsbn((String) value);
-                case "borrowedBy" -> {
-                    // Logic for 1:n relationship [cite: 21]
-                    if (value == null) book.setBorrowedBy(null);
-                    else book.setBorrowedBy(personRepository.findById(UUID.fromString(value.toString())).orElse(null));
+                case "personId" -> {
+                    UUID pId = UUID.fromString(value.toString());
+                    book.setBorrowedBy(personRepository.findById(pId).orElse(null));
                 }
             }
         });

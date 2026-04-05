@@ -1,8 +1,14 @@
+// src/app/models/book.model.ts
 export interface Book {
   id: string;
   title: string;
   authorName: string;
   isbn: string;
+  borrowedBy?: {
+    id: string;
+    name: string; // Matches the 'name' column in your Hibernate log
+    email: string;
+  };
 }
 
 export interface CreateBookDto {
