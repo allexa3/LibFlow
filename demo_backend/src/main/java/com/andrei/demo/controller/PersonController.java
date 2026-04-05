@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 
@@ -50,6 +51,12 @@ public class PersonController {
     @DeleteMapping("/person/{uuid}")
     public void deletePerson(@PathVariable UUID uuid) {
         personService.deletePerson(uuid);
+    }
+
+    @PatchMapping("/person/{uuid}")
+    public Person patchPerson(@PathVariable UUID uuid, @RequestBody Map<String, Object> updates)
+            throws ValidationException {
+        return personService.patchPerson(uuid, updates);
     }
 
 }

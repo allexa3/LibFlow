@@ -4,10 +4,6 @@ import jakarta.persistence.*;
 import lombok.Data;
 import java.util.UUID;
 
-enum UserRole {
-    ADMIN, CUSTOMER
-}
-
 @Entity
 @Data
 @Table(name = "person")

@@ -47,9 +47,10 @@ export class PersonListStore {
           this.hasError.set(true);
           // Fulfills the requirement: "Validations should be visible in the frontend"
           // This alerts the user to backend validation messages (e.g., "Email already in use")
-          alert(error.error?.message || "A validation error occurred");
+          alert(error.error?.message ||  error.error?.rror|| "A validation error occurred");
         },
       });
+
   }
 
   // create(dto: CreatePersonDto): void {
