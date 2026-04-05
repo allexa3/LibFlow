@@ -13,10 +13,19 @@ import {
 } from '../../components/person-form-dialog/person-form-dialog.component';
 import { CreatePersonDto, Person, UpdatePersonDto } from '../../models/person.model';
 import { PersonListStore } from './person-list.store';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
   selector: 'app-person-list-page',
-  imports: [MatTableModule, MatButtonModule, MatIconModule, MatDialogModule, MatToolbar],
+  imports: [
+    MatTableModule, 
+    MatButtonModule, 
+    MatIconModule, 
+    MatDialogModule, 
+    MatToolbar,
+    RouterLink,
+    RouterLinkActive
+  ],
   templateUrl: './person-list-page.component.html',
   styleUrl: './person-list-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

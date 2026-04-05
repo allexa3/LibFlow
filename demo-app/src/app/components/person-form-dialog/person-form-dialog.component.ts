@@ -10,7 +10,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-// NEW IMPORTS FOR SELECT
 import { MatSelectModule } from '@angular/material/select';
 import { MatOptionModule } from '@angular/material/core';
 
@@ -91,7 +90,6 @@ export class PersonFormDialogComponent implements OnInit {
       return;
     }
 
-    // UPDATED SUBMIT LOGIC 
     const { name, age, email, role, password } = this.form.getRawValue();
     const result: PersonFormValue = this.data.showPasswordField
       ? { name, age, email, role, password }

@@ -3,6 +3,7 @@ package com.andrei.demo.model;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import java.util.List;
 import java.util.UUID;
@@ -10,15 +11,20 @@ import java.util.UUID;
 @Data
 public class BookCreateDTO {
     @NotBlank(message = "Title is required")
+    @Size(min = 2, max = 100, message = "Title must be between 2 and 100 characters")
     private String title;
 
     @NotBlank(message = "ISBN is required")
-    @Pattern(regexp = "^(978|979)[0-9]{10}$", message = "Invalid ISBN-13 format")
+    @Pattern(regexp = "^(978|979)[0-9]{10}$", message = "Invalid ISBN-13 format (e.g., 9781234567890)")
     private String isbn;
 
-    @NotNull(message = "Publisher ID is required")
-    private UUID publisherId; // For the 1:n relationship
+    // Fixed: 1:n relationship with Person (The 'owner' or 'borrower')
+    @NotNull(message = "Person ID is required")
+    private UUID personId;
 
-    private List<UUID> authorIds; // For the n:m relationship
-    private List<UUID> genreIds;  // For the n:m relationship
+    private String authorName;
+
+    // For n:m relationship with Genres
+    @Size(min = 1, message = "At least one genre must be selected")
+    private List<UUID> genreIds;
 }

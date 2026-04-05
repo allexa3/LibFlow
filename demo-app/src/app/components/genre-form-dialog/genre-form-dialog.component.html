@@ -1,0 +1,27 @@
+<h2 mat-dialog-title>{{ data.title }}</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" id="genre-form" (ngSubmit)="submit()" autocomplete="off">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Genre Name</mat-label>
+      <input 
+        matInput 
+        formControlName="name" 
+        placeholder="Enter genre name" 
+        autocomplete="off" 
+      />
+      @if (form.controls.name.hasError('required')) {
+        <mat-error>Name is required.</mat-error>
+      } @else if (form.controls.name.hasError('minlength')) {
+        <mat-error>Name must be at least 2 characters.</mat-error>
+      }
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()">Cancel</button>
+  <button mat-flat-button type="submit" form="genre-form" color="primary">
+    {{ data.submitLabel ?? 'Submit' }}
+  </button>
+</mat-dialog-actions>

@@ -34,6 +34,7 @@ import { BookListStore } from './book-list.store';
   styleUrl: './book-list-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
+
 export class BookListPageComponent {
   private readonly dialog = inject(MatDialog);
   private readonly store = inject(BookListStore);
@@ -41,7 +42,8 @@ export class BookListPageComponent {
 
   protected readonly books = this.store.books;
   protected readonly isLoading = this.store.isLoading;
-  protected readonly displayedColumns = ['title', 'isbn', 'actions'];
+  protected readonly hasError = this.store.hasError;
+  protected readonly displayedColumns = ['title', 'authorName', 'isbn', 'actions'];
 
   constructor() {
     this.store.load();

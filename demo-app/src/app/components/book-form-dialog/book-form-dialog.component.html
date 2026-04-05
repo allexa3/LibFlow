@@ -1,36 +1,50 @@
 <h2 mat-dialog-title>{{ data.title }}</h2>
 
 <mat-dialog-content>
-  <form [formGroup]="form" (ngSubmit)="submit()" class="form-layout">
-    <mat-form-field appearance="outline">
+  <form [formGroup]="form" id="book-form" (ngSubmit)="submit()">
+    <mat-form-field appearance="outline" class="full-width">
       <mat-label>Title</mat-label>
-      <input matInput formControlName="title" placeholder="Enter book title" />
-      @if (form.get('title')?.hasError('required') && form.get('title')?.touched) {
-        <mat-error>Title is required</mat-error>
+      <input matInput formControlName="title" placeholder="Enter book title" autocomplete="off" />
+      @if (form.controls.title.hasError('required')) {
+        <mat-error>Title is required.</mat-error>
+      } @else if (form.controls.title.hasError('minlength')) {
+        <mat-error>Title must be at least 2 characters.</mat-error>
       }
     </mat-form-field>
 
-    <mat-form-field appearance="outline">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Author Name</mat-label>
+      <input matInput formControlName="authorName" placeholder="Enter author name" autocomplete="off" />
+      @if (form.controls.authorName.hasError('required')) {
+        <mat-error>Author is required.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
       <mat-label>ISBN</mat-label>
-      <input matInput formControlName="isbn" placeholder="Enter ISBN (10-13 digits)" />
-      @if (form.get('isbn')?.hasError('required') && form.get('isbn')?.touched) {
-        <mat-error>ISBN is required</mat-error>
+      <input matInput formControlName="isbn" placeholder="Enter ISBN (10-13 digits)" autocomplete="off" />
+      @if (form.controls.isbn.hasError('required')) {
+        <mat-error>ISBN is required.</mat-error>
+      } @else if (form.controls.isbn.hasError('minlength') || form.controls.isbn.hasError('maxlength')) {
+        <mat-error>ISBN must be between 10 and 13 characters.</mat-error>
       }
-      @if ((form.get('isbn')?.hasError('minlength') || form.get('isbn')?.hasError('maxlength')) && form.get('isbn')?.touched) {
-        <mat-error>ISBN must be between 10 and 13 characters</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Assign to Person</mat-label>
+      <mat-select formControlName="personId">
+      @for (person of people; track person.id) {
+        <mat-option [value]="person.id">{{person.name}}</mat-option>
       }
+     </mat-select>
+       <mat-error>You must assign this book to a person</mat-error>
     </mat-form-field>
   </form>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-button (click)="cancel()">Cancel</button>
-  <button
-    mat-flat-button
-    color="primary"
-    (click)="submit()"
-    [disabled]="form.invalid"
-  >
-    {{ data.submitLabel || 'Submit' }}
+  <button mat-button type="button" (click)="cancel()">Cancel</button>
+  <button mat-flat-button type="submit" form="book-form" color="primary">
+    {{ data.submitLabel ?? 'Submit' }}
   </button>
 </mat-dialog-actions>
