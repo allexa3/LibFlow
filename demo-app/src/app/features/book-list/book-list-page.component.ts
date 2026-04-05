@@ -43,17 +43,15 @@ export class BookListPageComponent {
   protected readonly books = this.store.books;
   protected readonly isLoading = this.store.isLoading;
   protected readonly hasError = this.store.hasError;
-  protected readonly displayedColumns = ['title', 'authorName', 'isbn', 'actions'];
+
+  // 1. Added 'genres' and 'borrowedBy' to the columns list
+  protected readonly displayedColumns = ['title', 'authorName', 'isbn', 'genres', 'borrowedBy', 'actions'];
 
   constructor() {
     this.store.load();
   }
 
   protected openCreateDialog(): void {
-    if (this.isLoading()) {
-      return;
-    }
-
     this.dialog
       .open<BookFormDialogComponent, BookFormDialogData, BookFormDialogResult>(
         BookFormDialogComponent,
@@ -62,18 +60,24 @@ export class BookListPageComponent {
       .afterClosed()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((result) => {
-        if (!result) return;
-        this.store.create(result);
+        if (result) this.store.create(result);
+      });
+  }
+
+  // 2. ADD THIS METHOD to fix the TS2339 error
+  protected openEditDialog(book: Book): void {
+    this.dialog
+      .open<BookFormDialogComponent, any, any>(BookFormDialogComponent, {
+        data: { title: 'Edit Book', submitLabel: 'Update', book: book },
+      })
+      .afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((result) => {
+        if (result) this.store.update(book.id, result);
       });
   }
 
   protected openDeleteDialog(book: Book): void {
-    if (this.isLoading()) {
-      return;
-    }
-
-    if (confirm(`Delete book "${book.title}"?`)) {
-      this.store.remove(book.id);
-    }
+    this.store.remove(book.id);
   }
 }

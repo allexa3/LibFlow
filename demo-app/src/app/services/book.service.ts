@@ -1,9 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Book, CreateBookDto } from '../models/book.model'; // Ensure CreateBookDto is imported
-
-
+import { Book, CreateBookDto } from '../models/book.model';
 
 @Injectable({ providedIn: 'root' })
 export class BookService {
@@ -14,12 +12,11 @@ export class BookService {
     return this.http.get<Book[]>(this.url);
   }
 
-  // FIXED: Implementation of create method
   create(dto: CreateBookDto): Observable<Book> {
-    return this.http.post<Book>(this.url, dto);
+    return this.http.post<Book>(this.url, dto); // FIXED: No longer throws error
   }
 
-  patch(id: string, updates: Partial<Book>): Observable<Book> {
+  patch(id: string, updates: Partial<CreateBookDto>): Observable<Book> {
     return this.http.patch<Book>(`${this.url}/${id}`, updates);
   }
 
