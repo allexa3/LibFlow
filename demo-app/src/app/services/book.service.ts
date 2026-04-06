@@ -13,7 +13,7 @@ export class BookService {
   }
 
   create(dto: CreateBookDto): Observable<Book> {
-    return this.http.post<Book>(this.url, dto); // FIXED: No longer throws error
+    return this.http.post<Book>(this.url, dto);
   }
 
   patch(id: string, updates: Partial<CreateBookDto>): Observable<Book> {

@@ -8,6 +8,5 @@ import java.util.UUID;
 
 @Repository
 public interface BookRepository extends JpaRepository<Book, UUID> {
-    // Helpful for checking "Duplicate Entry" edge cases (1.5p section)
     Optional<Book> findByIsbn(String isbn);
 }

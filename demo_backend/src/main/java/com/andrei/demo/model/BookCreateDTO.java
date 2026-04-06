@@ -18,7 +18,7 @@ public class BookCreateDTO {
     @Pattern(regexp = "^(978|979)[0-9]{10}$", message = "Invalid ISBN-13 format (e.g., 9781234567890)")
     private String isbn;
 
-    // Fixed: 1:n relationship with Person (The 'owner' or 'borrower')
+    // Fixed: 1:n relationship with Person
     @NotNull(message = "Person ID is required")
     private UUID personId;
 

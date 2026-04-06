@@ -38,7 +38,6 @@ public class GenreService {
     public Genre update(UUID id, GenreCreateDTO dto) throws ValidationException {
         Genre existingGenre = getById(id);
 
-        // Check for duplicate name on a DIFFERENT genre (edge case requirement)
         genreRepository.findByName(dto.getName()).ifPresent(found -> {
             if (!found.getId().equals(id)) {
                 throw new RuntimeException("Genre with name '" + dto.getName() + "' already exists.");

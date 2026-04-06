@@ -13,11 +13,8 @@ import java.util.UUID;
 public interface PersonRepository extends JpaRepository<Person, UUID> {
     Optional<Person> findByEmail(String email);
 
-    // JPA Derived Query
     Optional<Person> findByEmailAndAge(String email, Integer age);
 
-    // find person whose name starts or ends with the given string:
-    // JPA derived query and JPQL query
     @Query("SELECT p FROM Person p WHERE p.name LIKE ?1% OR p.name LIKE %?1")
     List<Person> findByNameApproximate(String name);
 

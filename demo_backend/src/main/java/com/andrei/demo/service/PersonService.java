@@ -24,7 +24,6 @@ public class PersonService {
 
 
     public Person addPerson(PersonCreateDTO personDTO) throws ValidationException {
-        // Manually handle duplicate email edge case
         if (personRepository.findByEmail(personDTO.getEmail()).isPresent()) {
             throw new ValidationException("Email " + personDTO.getEmail() + " is already in use.");
         }
@@ -43,7 +42,6 @@ public class PersonService {
         Person existingPerson = personRepository.findById(uuid)
                 .orElseThrow(() -> new ValidationException("Person with id " + uuid + " not found"));
 
-        // Check if the new email is already used by a DIFFERENT person
         Optional<Person> personWithEmail = personRepository.findByEmail(person.getEmail());
         if (personWithEmail.isPresent() && !personWithEmail.get().getId().equals(uuid)) {
             throw new ValidationException("Email " + person.getEmail() + " is already in use by another account.");

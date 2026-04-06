@@ -14,7 +14,7 @@ export interface CreateBookDto {
 }
 export interface BookCreateDto {
   title: string;
-  authorName: string; // Ensure this is exactly 'authorName'
+  authorName: string;
   isbn: string;
-  publisherId: string; // Added because it's required in your Java DTO
+  publisherId: string;
 }

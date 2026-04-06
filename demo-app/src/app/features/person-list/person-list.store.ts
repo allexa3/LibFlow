@@ -45,25 +45,11 @@ export class PersonListStore {
         },
         error: (error: HttpErrorResponse) => {
           this.hasError.set(true);
-          // Fulfills the requirement: "Validations should be visible in the frontend"
-          // This alerts the user to backend validation messages (e.g., "Email already in use")
           alert(error.error?.message ||  error.error?.rror|| "A validation error occurred");
         },
       });
 
   }
-
-  // create(dto: CreatePersonDto): void {
-  //   this.hasError.set(false);
-  //   this.beginRequest();
-  //   this.personService
-  //     .create(dto)
-  //     .pipe(finalize(() => this.endRequest()))
-  //     .subscribe({
-  //       next: (created) => this.persons.update((list) => [...list, created]),
-  //       error: () => this.hasError.set(true),
-  //     });
-  // }
 
   update(id: string, dto: UpdatePersonDto): void {
     const existing = this.persons().find((p) => p.id === id);

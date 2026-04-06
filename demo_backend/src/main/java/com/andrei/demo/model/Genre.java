@@ -17,6 +17,6 @@ public class Genre {
     private String name;
 
     @ManyToMany(mappedBy = "genres")
-    @JsonIgnore // Prevents the infinite loop that crashes the frontend fetch
+    @JsonIgnore
     private List<Book> books;
 }

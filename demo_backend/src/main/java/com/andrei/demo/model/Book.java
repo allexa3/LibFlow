@@ -5,7 +5,6 @@ import lombok.Data;
 import java.util.List;
 import java.util.UUID;
 
-// src/main/java/com/andrei/demo/model/Book.java
 @Entity
 @Data
 public class Book {
@@ -19,7 +18,6 @@ public class Book {
 
     @ManyToOne
     @JoinColumn(name = "person_id")
-    // This naming must match what the frontend expects (borrowedBy)
     private Person borrowedBy;
 
     @ManyToMany
