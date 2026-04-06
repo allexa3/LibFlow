@@ -64,18 +64,18 @@ export class BookListPageComponent {
       });
   }
 
-  // 2. ADD THIS METHOD to fix the TS2339 error
   protected openEditDialog(book: Book): void {
-    this.dialog
-      .open<BookFormDialogComponent, any, any>(BookFormDialogComponent, {
-        data: { title: 'Edit Book', submitLabel: 'Update', book: book },
-      })
-      .afterClosed()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((result) => {
-        if (result) this.store.update(book.id, result);
-      });
-  }
+  this.dialog
+    .open<BookFormDialogComponent, BookFormDialogData, BookFormDialogResult>(
+      BookFormDialogComponent,
+      { data: { title: 'Edit Book', submitLabel: 'Update', initialValue: book } }
+    )
+    .afterClosed()
+    .pipe(takeUntilDestroyed(this.destroyRef))
+    .subscribe((result) => {
+      if (result) this.store.update(book.id, result);
+    });
+}
 
   protected openDeleteDialog(book: Book): void {
     this.store.remove(book.id);

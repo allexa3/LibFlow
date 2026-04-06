@@ -22,6 +22,11 @@ public class BookService {
 
     public List<Book> getAll() { return bookRepository.findAll(); }
 
+    public Book getById(UUID id) throws ValidationException {
+        return bookRepository.findById(id)
+                .orElseThrow(() -> new ValidationException("Book not found"));
+    }
+
     public Book create(BookCreateDTO dto) throws ValidationException {
         // Edge Case: Duplicate ISBN Check (1.5p requirement)
         if (bookRepository.findByIsbn(dto.getIsbn()).isPresent()) {
@@ -65,4 +70,21 @@ public class BookService {
     }
 
     public void delete(UUID id) { bookRepository.deleteById(id); }
+
+    public Book update(UUID id, BookCreateDTO dto) throws ValidationException {
+        Book book = getById(id);
+        if (!book.getIsbn().equals(dto.getIsbn()) &&
+                bookRepository.findByIsbn(dto.getIsbn()).isPresent()) {
+            throw new ValidationException("A book with this ISBN already exists.");
+        }
+        book.setTitle(dto.getTitle());
+        book.setAuthorName(dto.getAuthorName());
+        book.setIsbn(dto.getIsbn());
+        book.setBorrowedBy(personRepository.findById(dto.getPersonId())
+                .orElseThrow(() -> new ValidationException("Person not found")));
+        if (dto.getGenreIds() != null) {
+            book.setGenres(genreRepository.findAllById(dto.getGenreIds()));
+        }
+        return bookRepository.save(book);
+    }
 }

@@ -11,7 +11,7 @@ import { Person } from '../../models/person.model';
 })
 export class ConfirmDeleteDialogComponent {
   private readonly dialogRef = inject(MatDialogRef<ConfirmDeleteDialogComponent>);
-  protected readonly data = inject<{ person: Person }>(MAT_DIALOG_DATA);
+  protected readonly data = inject<{ name: string }>(MAT_DIALOG_DATA);
 
   protected confirm(): void {
     this.dialogRef.close(true);

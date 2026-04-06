@@ -5,6 +5,7 @@ import { Genre, CreateGenreDto } from '../models/genre.model';
 
 @Injectable({ providedIn: 'root' })
 export class GenreService {
+  
   private readonly http = inject(HttpClient);
   private readonly url = 'http://localhost:8080/genre';
 
@@ -19,4 +20,8 @@ export class GenreService {
   delete(id: string): Observable<void> {
     return this.http.delete<void>(`${this.url}/${id}`);
   }
+
+  update(id: string, dto: CreateGenreDto): Observable<Genre> {
+  return this.http.put<Genre>(`${this.url}/${id}`, dto);
+}
 }

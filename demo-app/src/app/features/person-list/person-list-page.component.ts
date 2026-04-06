@@ -38,7 +38,7 @@ export class PersonListPageComponent {
   protected readonly persons = this.store.persons;
   protected readonly hasError = this.store.hasError;
   protected readonly isLoading = this.store.isLoading;
-  protected readonly displayedColumns = ['name', 'age', 'email', 'actions'];
+  protected readonly displayedColumns = ['name', 'age', 'email', 'role', 'actions'];
 
   constructor() {
     this.store.load();

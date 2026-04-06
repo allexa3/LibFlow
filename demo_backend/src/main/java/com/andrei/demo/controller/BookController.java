@@ -21,6 +21,11 @@ public class BookController {
     // Declare the service so the methods below can "see" it
     private final BookService bookService;
 
+    @GetMapping("/{id}")
+    public Book getById(@PathVariable UUID id) throws ValidationException {
+        return bookService.getById(id);
+    }
+
     @GetMapping
     public List<Book> getAll() {
         return bookService.getAll();
@@ -40,5 +45,10 @@ public class BookController {
     @DeleteMapping("/{id}")
     public void delete(@PathVariable UUID id) {
         bookService.delete(id);
+    }
+
+    @PutMapping("/{id}")
+    public Book update(@PathVariable UUID id, @RequestBody @Valid BookCreateDTO dto) throws ValidationException {
+        return bookService.update(id, dto);
     }
 }

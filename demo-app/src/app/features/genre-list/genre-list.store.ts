@@ -54,4 +54,15 @@ export class GenreListStore {
         error: () => alert("Failed to delete genre")
       });
   }
+
+  update(id: string, dto: CreateGenreDto): void {
+    this.beginRequest();
+    const request$ = this.genreService.update(id, dto) as unknown as Observable<Genre>;
+    request$
+      .pipe(finalize(() => this.endRequest()))
+      .subscribe({
+        next: (updated) => this.genres.update(list => list.map(g => g.id === id ? updated : g)),
+        error: (err: HttpErrorResponse) => alert(err.error?.error || "Update failed")
+      });
+  }
 }

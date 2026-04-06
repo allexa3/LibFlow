@@ -1,6 +1,7 @@
 package com.andrei.demo.config;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -46,6 +47,14 @@ public class GlobalExceptionHandler {
         Map<String, String> errorMap = new HashMap<>();
         errorMap.put("error", ex.getMessage());
         return errorMap;
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public Map<String, String> handleDataIntegrity(DataIntegrityViolationException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", "Duplicate entry or constraint violation");
+        return error;
     }
 }
 

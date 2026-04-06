@@ -14,12 +14,17 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/genre")
 @AllArgsConstructor
-@CrossOrigin
+@CrossOrigin(origins = "http://localhost:4200")
 public class GenreController {
     private final GenreService genreService;
 
     @GetMapping
     public List<Genre> getAll() { return genreService.getAll(); }
+
+    @GetMapping("/{id}")
+    public Genre getById(@PathVariable UUID id) throws ValidationException {
+        return genreService.getById(id);
+    }
 
     @PostMapping
     public Genre create(@RequestBody GenreCreateDTO dto) throws ValidationException {
@@ -33,4 +38,9 @@ public class GenreController {
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable UUID id) { genreService.delete(id); }
+
+    @PutMapping("/{id}")
+    public Genre update(@PathVariable UUID id, @RequestBody GenreCreateDTO dto) throws ValidationException {
+        return genreService.update(id, dto);
+    }
 }

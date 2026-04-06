@@ -79,4 +79,17 @@ export class GenreListPageComponent {
         }
       });
   }
+
+  protected editGenre(genre: Genre): void {
+  this.dialog
+    .open<GenreFormDialogComponent, GenreFormDialogData, GenreFormDialogResult>(
+      GenreFormDialogComponent,
+      { data: { title: 'Edit Genre', submitLabel: 'Update', initialValue: { name: genre.name } } }
+    )
+    .afterClosed()
+    .pipe(takeUntilDestroyed(this.destroyRef))
+    .subscribe((result) => {
+      if (result) this.store.update(genre.id, result);
+    });
+}
 }
