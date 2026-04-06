@@ -4,7 +4,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { BookFormValue } from '../book-form-dialog/book-form-dialog.component';
 
 export interface GenreFormDialogData {
   title: string;
@@ -20,7 +19,6 @@ export type GenreFormDialogResult = GenreFormValue | undefined;
 
 @Component({
   selector: 'app-genre-form-dialog',
-  standalone: true,
   imports: [
     ReactiveFormsModule,
     MatDialogModule,
@@ -52,7 +50,6 @@ export class GenreFormDialogComponent implements OnInit {
       this.form.markAllAsTouched();
       return;
     }
-    
     const result: GenreFormValue = this.form.getRawValue();
     this.dialogRef.close(result);
   }

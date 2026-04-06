@@ -24,7 +24,7 @@ export interface PersonFormValue {
   name: string;
   age: number;
   email: string;
-  role: string; // NEW FIELD 
+  role: string;
   password?: string;
 }
 
@@ -32,22 +32,21 @@ export interface PersonFormInitialValue {
   name: string;
   age: number;
   email: string;
-  role: string; // NEW FIELD 
+  role: string;
 }
 
 export type PersonFormDialogResult = PersonFormValue | undefined;
 
 @Component({
   selector: 'app-person-form-dialog',
-  standalone: true, // Ensure standalone is true [cite: 10]
   imports: [
     ReactiveFormsModule,
     MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatSelectModule, // ADDED [cite: 36]
-    MatOptionModule, // ADDED [cite: 36]
+    MatSelectModule,
+    MatOptionModule,
   ],
   templateUrl: './person-form-dialog.component.html',
   styleUrl: './person-form-dialog.component.scss',
@@ -60,12 +59,11 @@ export class PersonFormDialogComponent implements OnInit {
 
   protected readonly isPasswordVisible = signal(false);
 
-  // UPDATED FORM GROUP [cite: 16, 32]
   protected readonly form = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.minLength(2)]],
     age: [0, [Validators.required, Validators.min(18), Validators.max(200)]],
     email: ['', [Validators.required, Validators.email]],
-    role: ['CUSTOMER', [Validators.required]], // NEW CONTROL WITH DEFAULT 
+    role: ['CUSTOMER', [Validators.required]],
     password: ['', []],
   });
 

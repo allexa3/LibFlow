@@ -16,25 +16,15 @@ import java.util.UUID;
 public class GenreService {
     private final GenreRepository genreRepository;
 
-    /**
-     * Read All - Requirement 28
-     */
     public List<Genre> getAll() {
         return genreRepository.findAll();
     }
 
-    /**
-     * Read by ID - Requirement 27
-     */
     public Genre getById(UUID id) throws ValidationException {
         return genreRepository.findById(id)
                 .orElseThrow(() -> new ValidationException("Genre with id " + id + " not found"));
     }
 
-    /**
-     * Create a new entity - Requirement 26
-     * Includes manual validation for duplicate names - Requirement 32
-     */
     public Genre create(GenreCreateDTO dto) throws ValidationException {
         if (genreRepository.findByName(dto.getName()).isPresent()) {
             throw new ValidationException("Genre with name '" + dto.getName() + "' already exists.");
@@ -45,32 +35,36 @@ public class GenreService {
         return genreRepository.save(genre);
     }
 
-    /**
-     * Update an entity - Requirement 29
-     */
     public Genre update(UUID id, GenreCreateDTO dto) throws ValidationException {
         Genre existingGenre = getById(id);
+
+        // Check for duplicate name on a DIFFERENT genre (edge case requirement)
+        genreRepository.findByName(dto.getName()).ifPresent(found -> {
+            if (!found.getId().equals(id)) {
+                throw new RuntimeException("Genre with name '" + dto.getName() + "' already exists.");
+            }
+        });
+
         existingGenre.setName(dto.getName());
         return genreRepository.save(existingGenre);
     }
 
-    /**
-     * Patch an entity - Requirement 30
-     * Allows partial updates (e.g., just the name)
-     */
     public Genre patch(UUID id, Map<String, Object> updates) throws ValidationException {
         Genre genre = getById(id);
 
         if (updates.containsKey("name")) {
-            genre.setName((String) updates.get("name"));
+            String newName = (String) updates.get("name");
+            genreRepository.findByName(newName).ifPresent(found -> {
+                if (!found.getId().equals(id)) {
+                    throw new RuntimeException("Genre with name '" + newName + "' already exists.");
+                }
+            });
+            genre.setName(newName);
         }
 
         return genreRepository.save(genre);
     }
 
-    /**
-     * Delete an entity - Requirement 31
-     */
     public void delete(UUID id) {
         genreRepository.deleteById(id);
     }

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -28,7 +29,6 @@ public class BookService {
     }
 
     public Book create(BookCreateDTO dto) throws ValidationException {
-        // Edge Case: Duplicate ISBN Check (1.5p requirement)
         if (bookRepository.findByIsbn(dto.getIsbn()).isPresent()) {
             throw new ValidationException("A book with this ISBN already exists.");
         }
@@ -38,19 +38,17 @@ public class BookService {
         book.setAuthorName(dto.getAuthorName());
         book.setIsbn(dto.getIsbn());
 
-        // 1:n Relationship
         book.setBorrowedBy(personRepository.findById(dto.getPersonId())
                 .orElseThrow(() -> new ValidationException("Person not found")));
 
-        // n:m Relationship
-        if (dto.getGenreIds() != null) {
+        if (dto.getGenreIds() != null && !dto.getGenreIds().isEmpty()) {
             book.setGenres(genreRepository.findAllById(dto.getGenreIds()));
         }
 
         return bookRepository.save(book);
     }
 
-    // PATCH implementation (Required for full CRUD points)
+    @SuppressWarnings("unchecked")
     public Book patch(UUID id, Map<String, Object> updates) throws ValidationException {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new ValidationException("Book not found"));
@@ -63,6 +61,13 @@ public class BookService {
                 case "personId" -> {
                     UUID pId = UUID.fromString(value.toString());
                     book.setBorrowedBy(personRepository.findById(pId).orElse(null));
+                }
+                case "genreIds" -> {
+                    // value arrives as List<String> from JSON
+                    List<UUID> genreIds = ((List<?>) value).stream()
+                            .map(v -> UUID.fromString(v.toString()))
+                            .collect(Collectors.toList());
+                    book.setGenres(genreRepository.findAllById(genreIds));
                 }
             }
         });
@@ -82,7 +87,7 @@ public class BookService {
         book.setIsbn(dto.getIsbn());
         book.setBorrowedBy(personRepository.findById(dto.getPersonId())
                 .orElseThrow(() -> new ValidationException("Person not found")));
-        if (dto.getGenreIds() != null) {
+        if (dto.getGenreIds() != null && !dto.getGenreIds().isEmpty()) {
             book.setGenres(genreRepository.findAllById(dto.getGenreIds()));
         }
         return bookRepository.save(book);

@@ -18,13 +18,13 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 @Component({
   selector: 'app-person-list-page',
   imports: [
-    MatTableModule, 
-    MatButtonModule, 
-    MatIconModule, 
-    MatDialogModule, 
+    MatTableModule,
+    MatButtonModule,
+    MatIconModule,
+    MatDialogModule,
     MatToolbar,
     RouterLink,
-    RouterLinkActive
+    RouterLinkActive,
   ],
   templateUrl: './person-list-page.component.html',
   styleUrl: './person-list-page.component.scss',
@@ -45,9 +45,7 @@ export class PersonListPageComponent {
   }
 
   protected openCreateDialog(): void {
-    if (this.isLoading()) {
-      return;
-    }
+    if (this.isLoading()) return;
 
     this.dialog
       .open<PersonFormDialogComponent, PersonFormDialogData, PersonFormDialogResult>(
@@ -63,9 +61,7 @@ export class PersonListPageComponent {
   }
 
   protected openEditDialog(person: Person): void {
-    if (this.isLoading()) {
-      return;
-    }
+    if (this.isLoading()) return;
 
     this.dialog
       .open<PersonFormDialogComponent, PersonFormDialogData, PersonFormDialogResult>(
@@ -81,14 +77,12 @@ export class PersonListPageComponent {
   }
 
   protected openDeleteDialog(person: Person): void {
-    if (this.isLoading()) {
-      return;
-    }
+    if (this.isLoading()) return;
 
     this.dialog
-      .open<ConfirmDeleteDialogComponent, { person: Person }, boolean>(
+      .open<ConfirmDeleteDialogComponent, { name: string }, boolean>(
         ConfirmDeleteDialogComponent,
-        { data: { person } },
+        { data: { name: person.name } },
       )
       .afterClosed()
       .pipe(takeUntilDestroyed(this.destroyRef))

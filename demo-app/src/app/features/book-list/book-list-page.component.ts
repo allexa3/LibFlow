@@ -16,6 +16,7 @@ import {
   BookFormDialogData,
   BookFormDialogResult,
 } from '../../components/book-form-dialog/book-form-dialog.component';
+import { ConfirmDeleteDialogComponent } from '../../components/confirm-delete-dialog/confirm-delete-dialog.component';
 import { Book } from '../../models/book.model';
 import { BookListStore } from './book-list.store';
 
@@ -34,7 +35,6 @@ import { BookListStore } from './book-list.store';
   styleUrl: './book-list-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-
 export class BookListPageComponent {
   private readonly dialog = inject(MatDialog);
   private readonly store = inject(BookListStore);
@@ -43,8 +43,6 @@ export class BookListPageComponent {
   protected readonly books = this.store.books;
   protected readonly isLoading = this.store.isLoading;
   protected readonly hasError = this.store.hasError;
-
-  // 1. Added 'genres' and 'borrowedBy' to the columns list
   protected readonly displayedColumns = ['title', 'authorName', 'isbn', 'genres', 'borrowedBy', 'actions'];
 
   constructor() {
@@ -65,19 +63,28 @@ export class BookListPageComponent {
   }
 
   protected openEditDialog(book: Book): void {
-  this.dialog
-    .open<BookFormDialogComponent, BookFormDialogData, BookFormDialogResult>(
-      BookFormDialogComponent,
-      { data: { title: 'Edit Book', submitLabel: 'Update', initialValue: book } }
-    )
-    .afterClosed()
-    .pipe(takeUntilDestroyed(this.destroyRef))
-    .subscribe((result) => {
-      if (result) this.store.update(book.id, result);
-    });
-}
+    this.dialog
+      .open<BookFormDialogComponent, BookFormDialogData, BookFormDialogResult>(
+        BookFormDialogComponent,
+        { data: { title: 'Edit Book', submitLabel: 'Update', initialValue: book } },
+      )
+      .afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((result) => {
+        if (result) this.store.update(book.id, result);
+      });
+  }
 
   protected openDeleteDialog(book: Book): void {
-    this.store.remove(book.id);
+    this.dialog
+      .open<ConfirmDeleteDialogComponent, { name: string }, boolean>(
+        ConfirmDeleteDialogComponent,
+        { data: { name: book.title } },
+      )
+      .afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((confirmed) => {
+        if (confirmed) this.store.remove(book.id);
+      });
   }
 }
