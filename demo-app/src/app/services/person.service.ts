@@ -24,8 +24,5 @@ export class PersonService {
   delete(id: string): Observable<void> {
     return this.http.delete<void>(`${API_URL}/${id}`);
   }
-
-  patch(id: string, updates: Partial<Person>): Observable<Person> {
-    return this.http.patch<Person>(`${API_URL}/${id}`, updates);
-  }
 }
+

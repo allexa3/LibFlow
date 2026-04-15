@@ -9,7 +9,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 
@@ -34,10 +33,10 @@ public class PersonController {
         return personService.getPersonByEmail(email);
     }
 
-
     @PostMapping("/person")
-    public Person addPerson(@Valid @RequestBody PersonCreateDTO personDTO)
-            throws ValidationException { // Add this line
+    public Person addPerson(
+            @Valid @RequestBody PersonCreateDTO personDTO
+    ) {
         return personService.addPerson(personDTO);
     }
 
@@ -51,12 +50,6 @@ public class PersonController {
     @DeleteMapping("/person/{uuid}")
     public void deletePerson(@PathVariable UUID uuid) {
         personService.deletePerson(uuid);
-    }
-
-    @PatchMapping("/person/{uuid}")
-    public Person patchPerson(@PathVariable UUID uuid, @RequestBody Map<String, Object> updates)
-            throws ValidationException {
-        return personService.patchPerson(uuid, updates);
     }
 
 }

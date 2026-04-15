@@ -4,7 +4,6 @@ export interface Person {
   age: number;
   email: string;
   password: string;
-  role: 'ADMIN' | 'CUSTOMER';
 }
 
 export type CreatePersonDto = Omit<Person, 'id'>;

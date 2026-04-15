@@ -2,6 +2,7 @@ package com.andrei.demo.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+
 import java.util.UUID;
 
 @Entity
@@ -22,8 +23,4 @@ public class Person {
 
     @Column(name = "email", nullable = false, unique = true)
     private String email;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "role", nullable = false)
-    private UserRole role;
 }

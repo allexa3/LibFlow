@@ -1,7 +1,10 @@
 package com.andrei.demo.model;
 
 import com.andrei.demo.validator.StrongPassword;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
@@ -19,15 +22,8 @@ public class PersonCreateDTO {
 
 
     @NotNull(message = "Age is required")
-    @Min(value = 18, message = "Age must be at least 18")
-    @Max(value = 200, message = "Age must be less than 200")
     private Integer age;
 
-    // In PersonCreateDTO.java - add @Email
-    @Email(message = "Email must be valid")
     @NotBlank(message = "Email is required")
     private String email;
-
-    @NotNull(message = "Role is required")
-    private UserRole role;
 }

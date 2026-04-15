@@ -37,39 +37,3 @@ body {
   height: 100%;
 }
 /* You can add global styles to this file, and also import other style files */
-
-
-/* ─── Snackbar / Notification styles ─────────────────────────────────────── */
-
-.snack-error .mdc-snackbar__surface {
-  background-color: #b71c1c !important;
-  color: #fff !important;
-  white-space: pre-line; /* allows \n line breaks in multi-field validation */
-}
-
-.snack-error .mat-mdc-button.mat-mdc-snack-bar-action {
-  color: #ffcdd2 !important;
-}
-
-.snack-success .mdc-snackbar__surface {
-  background-color: #1b5e20 !important;
-  color: #fff !important;
-}
-
-.snack-success .mat-mdc-button.mat-mdc-snack-bar-action {
-  color: #c8e6c9 !important;
-}
-
-.snack-info .mdc-snackbar__surface {
-  background-color: #0d47a1 !important;
-  color: #fff !important;
-}
-
-.snack-info .mat-mdc-button.mat-mdc-snack-bar-action {
-  color: #bbdefb !important;
-}
-
-.mdc-snackbar__label {
-  font-size: 0.875rem !important;
-  line-height: 1.5 !important;
-}
