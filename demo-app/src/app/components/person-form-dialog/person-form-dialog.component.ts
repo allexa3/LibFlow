@@ -73,7 +73,9 @@ export class PersonFormDialogComponent implements OnInit {
     }
 
     if (this.data.showPasswordField) {
-      this.form.controls.password.setValidators([Validators.required]);
+      this.form.controls.password.setValidators([
+        Validators.required,
+      ]);
       this.form.controls.password.updateValueAndValidity();
     }
   }

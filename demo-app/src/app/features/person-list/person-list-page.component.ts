@@ -13,7 +13,8 @@ import {
 } from '../../components/person-form-dialog/person-form-dialog.component';
 import { CreatePersonDto, Person, UpdatePersonDto } from '../../models/person.model';
 import { PersonListStore } from './person-list.store';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { LoginStore } from '../login/login.store';
 
 @Component({
   selector: 'app-person-list-page',
@@ -33,6 +34,8 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 export class PersonListPageComponent {
   private readonly dialog = inject(MatDialog);
   private readonly store = inject(PersonListStore);
+  private readonly loginStore = inject(LoginStore);
+  private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly persons = this.store.persons;
@@ -44,8 +47,15 @@ export class PersonListPageComponent {
     this.store.load();
   }
 
+  protected logout(): void {
+    this.loginStore.logout();
+    void this.router.navigate(['/login']);
+  }
+
   protected openCreateDialog(): void {
-    if (this.isLoading()) return;
+    if (this.isLoading()) {
+      return;
+    }
 
     this.dialog
       .open<PersonFormDialogComponent, PersonFormDialogData, PersonFormDialogResult>(
@@ -61,7 +71,9 @@ export class PersonListPageComponent {
   }
 
   protected openEditDialog(person: Person): void {
-    if (this.isLoading()) return;
+    if (this.isLoading()) {
+      return;
+    }
 
     this.dialog
       .open<PersonFormDialogComponent, PersonFormDialogData, PersonFormDialogResult>(
@@ -77,12 +89,14 @@ export class PersonListPageComponent {
   }
 
   protected openDeleteDialog(person: Person): void {
-    if (this.isLoading()) return;
+    if (this.isLoading()) {
+      return;
+    }
 
     this.dialog
-      .open<ConfirmDeleteDialogComponent, { name: string }, boolean>(
+      .open<ConfirmDeleteDialogComponent, { person: Person }, boolean>(
         ConfirmDeleteDialogComponent,
-        { data: { name: person.name } },
+        { data: { person } },
       )
       .afterClosed()
       .pipe(takeUntilDestroyed(this.destroyRef))

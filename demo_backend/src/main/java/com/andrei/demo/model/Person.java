@@ -2,6 +2,7 @@ package com.andrei.demo.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+
 import java.util.UUID;
 
 @Entity

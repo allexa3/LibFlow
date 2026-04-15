@@ -115,3 +115,12 @@
   display: flex;
   gap: 12px;
 }
+.page-toolbar {
+  .toolbar-title {
+    font-weight: 500;
+  }
+
+  .toolbar-spacer {
+    flex: 1 1 auto;
+  }
+}

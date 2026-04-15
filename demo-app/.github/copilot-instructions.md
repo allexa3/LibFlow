@@ -120,4 +120,3 @@ Here is a link to the most recent Angular style guide https://angular.dev/style-
 - Design services around a single responsibility
 - Use the `providedIn: 'root'` option for singleton services
 - Use the `inject()` function instead of constructor injection
-  

@@ -2,6 +2,10 @@ package com.andrei.demo.model;
 
 import com.andrei.demo.validator.StrongPassword;
 import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
