@@ -8,13 +8,13 @@
         <mat-label>Email</mat-label>
         <input
           matInput
-          type="email"
-          formControlName="email"
+          type="text"
+          formControlName="text"
           autocomplete="username"
           required
           aria-describedby="email-errors"
         />
-        @if (loginForm.controls.email.touched && loginForm.controls.email.hasError('required')) {
+        @if (loginForm.controls.text.touched && loginForm.controls.text.hasError('required')) {
           <mat-error id="email-errors">Email is required.</mat-error>
         }
       </mat-form-field>

@@ -1,16 +1,10 @@
 [
   {
-    "id": null,
+    "id": "212ce74b-b872-46c0-a159-7d8da9c50133",
     "name": "John Doe",
-    "password": "Password_john123!@#",
-    "age": 30,
-    "email": "john.doe@example.com"
-  },
-  {
-    "id": null,
-    "name": "Jane Doe",
-    "password": "Password_jane123!@#",
-    "age": 25,
-    "email": "jane.doe@example.com"
+    "password": "JohnDoe7913!!../.",
+    "age": 45,
+    "email": "johndoe@gmail.com",
+    "role": "CUSTOMER"
   }
 ]
