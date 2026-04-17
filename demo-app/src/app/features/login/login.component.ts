@@ -31,7 +31,7 @@ export class LoginComponent {
   protected readonly errorMessage = this.loginStore.errorMessage;
 
   protected readonly loginForm = this.formBuilder.group({
-    email: ['', [Validators.required]],
+    email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required]],
   });
 
@@ -50,8 +50,13 @@ export class LoginComponent {
           return;
         }
 
-        void this.router.navigate(['/people']);
+        // Role-based redirect: ADMIN goes to /people, CUSTOMER goes to /books
+        const role = this.loginStore.role();
+        if (role === 'ADMIN') {
+          void this.router.navigate(['/people']);
+        } else {
+          void this.router.navigate(['/books']);
+        }
       });
   }
 }
-

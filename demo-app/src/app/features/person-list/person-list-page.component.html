@@ -13,16 +13,15 @@
         <mat-icon>category</mat-icon> Genres
       </a>
     </nav>
+
+    <span class="toolbar-spacer" aria-hidden="true"></span>
+    <button mat-button type="button" (click)="logout()" aria-label="Sign out">
+      <mat-icon aria-hidden="true">logout</mat-icon>
+      Logout
+    </button>
   </div>
 </mat-toolbar>
-<mat-toolbar color="primary" class="page-toolbar">
-  <span class="toolbar-title">Person Manager</span>
-  <span class="toolbar-spacer" aria-hidden="true"></span>
-  <button mat-button type="button" (click)="logout()" aria-label="Sign out">
-    <mat-icon aria-hidden="true">logout</mat-icon>
-    Logout
-  </button>
-</mat-toolbar>
+
 <main class="content">
   <header class="page-header">
     <div>
@@ -74,11 +73,21 @@
         <td mat-cell *matCellDef="let person">{{ person.email }}</td>
       </ng-container>
 
+      <ng-container matColumnDef="role">
+        <th mat-header-cell *matHeaderCellDef scope="col">Role</th>
+        <td mat-cell *matCellDef="let person">
+          <span [class]="'role-badge role-' + person.role?.toLowerCase()">
+            {{ person.role }}
+          </span>
+        </td>
+      </ng-container>
+
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef scope="col">Actions</th>
         <td mat-cell *matCellDef="let person">
           <button
             mat-icon-button
+            color="primary"
             (click)="openEditDialog(person)"
             [attr.aria-label]="'Edit ' + person.name"
             [disabled]="isLoading()"

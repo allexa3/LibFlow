@@ -19,19 +19,19 @@ public class SecurityService {
 
     public LoginResponse login(String email, String password) {
         Optional<Person> maybePerson = personRepository.findByEmail(email);
-        if(maybePerson.isEmpty()) {
+        if (maybePerson.isEmpty()) {
             return new LoginResponse(
                     "Person with email " + email + " not found"
             );
         }
         Person person = maybePerson.get();
-        if(passwordUtil.checkPassword(password, person.getPassword())) {
+        if (passwordUtil.checkPassword(password, person.getPassword())) {
             String token = jwtUtil.createToken(person);
-            return new LoginResponse("ADMIN", token);
+            // Return the actual role from the person entity, not hardcoded "ADMIN"
+            String role = person.getRole() != null ? person.getRole().name() : "CUSTOMER";
+            return new LoginResponse(role, token);
         } else {
-            return new LoginResponse(
-                    "Incorrect password"
-            );
+            return new LoginResponse("Incorrect password");
         }
     }
 }

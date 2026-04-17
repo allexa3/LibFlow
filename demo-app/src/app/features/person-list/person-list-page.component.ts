@@ -5,7 +5,10 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { MatToolbar } from '@angular/material/toolbar';
-import { ConfirmDeleteDialogComponent } from '../../components/confirm-delete-dialog/confirm-delete-dialog.component';
+import {
+  ConfirmDeleteDialogComponent,
+  ConfirmDeleteDialogData,
+} from '../../components/confirm-delete-dialog/confirm-delete-dialog.component';
 import {
   PersonFormDialogComponent,
   PersonFormDialogData,
@@ -94,9 +97,9 @@ export class PersonListPageComponent {
     }
 
     this.dialog
-      .open<ConfirmDeleteDialogComponent, { person: Person }, boolean>(
+      .open<ConfirmDeleteDialogComponent, ConfirmDeleteDialogData, boolean>(
         ConfirmDeleteDialogComponent,
-        { data: { person } },
+        { data: { name: person.name } },
       )
       .afterClosed()
       .pipe(takeUntilDestroyed(this.destroyRef))

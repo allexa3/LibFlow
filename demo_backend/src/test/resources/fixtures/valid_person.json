@@ -1,6 +1,7 @@
 {
   "name": "Alice Smith",
-  "password": "Securepass123!@#",
+  "password": "Securepass123!",
   "age": 28,
-  "email": "alice.smith@example.com"
+  "email": "alice.smith@example.com",
+  "role": "CUSTOMER"
 }
