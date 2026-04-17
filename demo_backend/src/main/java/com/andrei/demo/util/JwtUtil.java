@@ -31,6 +31,9 @@ public class JwtUtil {
     }
 
     public String createToken(Person person) {
+        // Use the actual role from the person, not hardcoded "ADMIN"
+        String role = person.getRole() != null ? person.getRole().name() : "CUSTOMER";
+
         return Jwts
                 .builder()
                 .subject(person.getEmail())
@@ -38,10 +41,10 @@ public class JwtUtil {
                 .issuedAt(getCurrentDate())
                 .claims(Map.of(
                         "userId", person.getId(),
-                        "role", "ADMIN"
+                        "role", role
                 ))
-                // the token will be expired in 10 hours
-                .expiration(new Date(System.currentTimeMillis() + 1000* 60 * 60 *10))
+                // token expires in 10 hours
+                .expiration(new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 10))
                 .signWith(getSignInKey(), Jwts.SIG.HS256)
                 .compact();
     }
@@ -54,7 +57,7 @@ public class JwtUtil {
                 .getPayload();
     }
 
-    public boolean checkClaims(String token){
+    public boolean checkClaims(String token) {
         Claims claims = getAllClaimsFromToken(token);
 
         // check issuer
@@ -74,14 +77,15 @@ public class JwtUtil {
             log.error("Token issued at date is invalid");
             return false;
         }
+
         // check claims
         if (claims.get("userId") == null || claims.get("role") == null) {
             log.error("Token claims are invalid: does not contain userId and role");
             return false;
         }
+
         log.info("Token is valid. User ID: {}, Role: {}",
                 claims.get("userId"), claims.get("role"));
         return true;
     }
-
 }

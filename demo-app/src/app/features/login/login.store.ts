@@ -1,6 +1,6 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
-import { catchError, finalize, Observable, of, tap } from 'rxjs';
+import { catchError, finalize, map, Observable, of, tap } from 'rxjs';
 import { LoginRequest, LoginResponse, LoginService } from '../../services/login.service';
 
 interface AuthSnapshot {
@@ -45,8 +45,9 @@ export class LoginStore {
 
   private applyResponse(response: LoginResponse): void {
     if (response.success && response.token) {
+      // Set both signals synchronously so callers see the updated role immediately
       this.token.set(response.token);
-      this.role.set(response.role);
+      this.role.set(response.role ?? null);
       this.errorMessage.set(null);
       this.persistAuthState();
       return;
@@ -56,18 +57,38 @@ export class LoginStore {
   }
 
   private normalizeError(error: unknown): LoginResponse {
-    if (error instanceof HttpErrorResponse && error.error) {
-      const maybeError = error.error as Partial<LoginResponse>;
-      if (typeof maybeError.success === 'boolean') {
+    if (error instanceof HttpErrorResponse) {
+      // Backend returned a structured LoginResponse with success=false
+      const body = error.error as Partial<LoginResponse> | null;
+      if (body && typeof body.success === 'boolean') {
         return {
-          success: maybeError.success,
-          role: maybeError.role ?? null,
-          token: maybeError.token ?? null,
+          success: false,
+          role: body.role ?? null,
+          token: body.token ?? null,
           errorMessage:
-            maybeError.errorMessage ??
+            body.errorMessage ??
             (error.status === 401
               ? 'Invalid email or password.'
               : 'Unable to complete login. Please try again.'),
+        };
+      }
+
+      // Network error or unexpected shape
+      if (error.status === 0) {
+        return {
+          success: false,
+          role: null,
+          token: null,
+          errorMessage: 'Cannot reach the server. Make sure the backend is running on port 8080.',
+        };
+      }
+
+      if (error.status === 401) {
+        return {
+          success: false,
+          role: null,
+          token: null,
+          errorMessage: 'Invalid email or password.',
         };
       }
     }
@@ -82,9 +103,7 @@ export class LoginStore {
 
   private restoreAuthState(): void {
     const stored = sessionStorage.getItem(STORAGE_KEY);
-    if (!stored) {
-      return;
-    }
+    if (!stored) return;
 
     try {
       const snapshot = JSON.parse(stored) as AuthSnapshot;
@@ -92,7 +111,6 @@ export class LoginStore {
         this.clearSession();
         return;
       }
-
       this.token.set(snapshot.token);
       this.role.set(snapshot.role ?? null);
     } catch {
@@ -102,15 +120,12 @@ export class LoginStore {
 
   private persistAuthState(): void {
     const token = this.token();
-    if (!token) {
-      return;
-    }
+    if (!token) return;
 
     const snapshot: AuthSnapshot = {
       role: this.role(),
       token,
     };
-
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
   }
 

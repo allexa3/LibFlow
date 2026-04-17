@@ -50,8 +50,10 @@ export class LoginComponent {
           return;
         }
 
-        // Role-based redirect: ADMIN goes to /people, CUSTOMER goes to /books
-        const role = this.loginStore.role();
+        // Read role directly from the response to avoid any signal-timing issues.
+        // The store's applyResponse() has already set the signals by this point,
+        // but using the response value is safer and more explicit.
+        const role = response.role;
         if (role === 'ADMIN') {
           void this.router.navigate(['/people']);
         } else {
