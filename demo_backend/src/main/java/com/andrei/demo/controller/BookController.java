@@ -12,13 +12,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-@RestController // REQUIRED: Tells Spring this is a Web Controller
-@RequestMapping("/books") // REQUIRED: Maps this class to the /books URL
-@AllArgsConstructor // REQUIRED: Automatically creates a constructor to inject bookService
-@CrossOrigin(origins = "http://localhost:4200") // REQUIRED: Fixes "Failed to load" errors in Frontend
+@RestController
+@RequestMapping("/books")
+@AllArgsConstructor
+// Removed @CrossOrigin - CORS is handled globally by SecurityConfig
 public class BookController {
 
-    // Declare the service so the methods below can "see" it
     private final BookService bookService;
 
     @GetMapping("/{id}")
@@ -32,7 +31,6 @@ public class BookController {
     }
 
     @PostMapping
-    // Added 'throws ValidationException' to satisfy the compiler
     public Book create(@RequestBody @Valid BookCreateDTO dto) throws ValidationException {
         return bookService.create(dto);
     }

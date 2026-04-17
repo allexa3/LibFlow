@@ -47,10 +47,14 @@ public class SecurityConfig {
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
-        return source -> {
-            UrlBasedCorsConfigurationSource s = new UrlBasedCorsConfigurationSource();
-            s.registerCorsConfiguration("/**", config);
-            return s.getCorsConfiguration(source);
-        };
+        config.setMaxAge(3600L);
+
+        // Must return UrlBasedCorsConfigurationSource directly - NOT a lambda wrapper.
+        // The lambda form implements CorsConfigurationSource but creates a fresh
+        // UrlBasedCorsConfigurationSource per call without registering the config,
+        // so CORS headers are never actually added to responses.
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
     }
 }

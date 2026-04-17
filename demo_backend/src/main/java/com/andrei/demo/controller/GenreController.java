@@ -14,7 +14,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/genre")
 @AllArgsConstructor
-@CrossOrigin(origins = "http://localhost:4200")
+// Removed @CrossOrigin - CORS is handled globally by SecurityConfig
 public class GenreController {
     private final GenreService genreService;
 

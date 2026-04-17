@@ -12,10 +12,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-
 @RestController
 @AllArgsConstructor
-@CrossOrigin
+// Removed @CrossOrigin - CORS is handled globally by SecurityConfig
 public class PersonController {
     private final PersonService personService;
 
@@ -34,10 +33,9 @@ public class PersonController {
         return personService.getPersonByEmail(email);
     }
 
-
     @PostMapping("/person")
     public Person addPerson(@Valid @RequestBody PersonCreateDTO personDTO)
-            throws ValidationException { // Add this line
+            throws ValidationException {
         return personService.addPerson(personDTO);
     }
 
@@ -58,5 +56,4 @@ public class PersonController {
             throws ValidationException {
         return personService.patchPerson(uuid, updates);
     }
-
 }
