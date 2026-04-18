@@ -20,20 +20,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
 
-    /**
-     * Tell Spring not to run this filter for:
-     *  - the /login endpoint (no token yet)
-     *  - OPTIONS preflight requests (browser sends these before every CORS request)
-     *
-     * Spring Security's permitAll() rules in SecurityConfig allow these through
-     * the security filter chain, but we also need to skip our custom JWT check
-     * so we don't send a 401 before the CORS headers can be added.
-     */
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
         String method = request.getMethod();
-        boolean skip = "/login".equals(path) || "OPTIONS".equalsIgnoreCase(method);
+        boolean skip = "/login".equals(path)
+                || path.startsWith("/dev/")
+                || "OPTIONS".equalsIgnoreCase(method);
         if (skip) {
             log.debug("JwtAuthFilter skipping path={} method={}", path, method);
         }
