@@ -2,6 +2,7 @@ package com.andrei.demo.service;
 
 import com.andrei.demo.model.LoginResponse;
 import com.andrei.demo.model.Person;
+import com.andrei.demo.model.UserRole;
 import com.andrei.demo.repository.PersonRepository;
 import com.andrei.demo.util.JwtUtil;
 import com.andrei.demo.util.PasswordUtil;
@@ -46,12 +47,14 @@ class SecurityServiceTests {
 
     @Test
     void testLoginSuccess() {
-        String email = "john@example.com";
-        String password = "password";
+        String email = "test@example.com";
+        String password = "$2a$10$8.UnVuG9HHgffUDAlk8qfOuVGkqRzgVymGe07xd00DMxs.TVuHOnu";
         String token = "token-123";
         Person person = new Person();
         person.setEmail(email);
-        person.setPassword("hashed-password");
+        // Valid BCrypt hash for "Password123!"
+        person.setPassword(password);
+        person.setRole(UserRole.ADMIN);
 
         when(personRepository.findByEmail(email)).thenReturn(Optional.of(person));
         when(passwordUtil.checkPassword(password, person.getPassword())).thenReturn(true);
@@ -69,11 +72,13 @@ class SecurityServiceTests {
 
     @Test
     void testLoginIncorrectPassword() {
-        String email = "john@example.com";
-        String password = "password";
+        String email = "test@example.com";
+        String password = "$2a$10$8.UnVuG9HHgffUDAlk8qfOuVGkqRzgVymGe07xd00DMxs.TVuHOnu";
         Person person = new Person();
         person.setEmail(email);
-        person.setPassword("stored-hash");
+// Valid BCrypt hash for "Password123!"
+        person.setPassword(password);
+        person.setRole(UserRole.ADMIN);
 
         when(personRepository.findByEmail(email)).thenReturn(Optional.of(person));
         when(passwordUtil.checkPassword(password, person.getPassword())).thenReturn(false);

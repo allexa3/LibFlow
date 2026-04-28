@@ -31,8 +31,8 @@ public class SecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-//                        .requestMatchers("/login").permitAll()
                         .requestMatchers("/login", "/dev/**").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/person/**").permitAll() // Add this
                         .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated()
                 )
@@ -50,10 +50,6 @@ public class SecurityConfig {
         config.setAllowCredentials(true);
         config.setMaxAge(3600L);
 
-        // Must return UrlBasedCorsConfigurationSource directly - NOT a lambda wrapper.
-        // The lambda form implements CorsConfigurationSource but creates a fresh
-        // UrlBasedCorsConfigurationSource per call without registering the config,
-        // so CORS headers are never actually added to responses.
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;

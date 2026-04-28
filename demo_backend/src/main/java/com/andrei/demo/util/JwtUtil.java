@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.Map;
+import java.util.UUID;
 
 @Component
 @Slf4j
@@ -31,19 +32,15 @@ public class JwtUtil {
     }
 
     public String createToken(Person person) {
-        // Use the actual role from the person, not hardcoded "ADMIN"
         String role = person.getRole() != null ? person.getRole().name() : "CUSTOMER";
-
-        return Jwts
-                .builder()
+        return Jwts.builder()
                 .subject(person.getEmail())
                 .issuer("demo-spring-boot-backend")
                 .issuedAt(getCurrentDate())
                 .claims(Map.of(
-                        "userId", person.getId(),
+                        "userId", person.getId().toString(), // Store as string for easy parsing
                         "role", role
                 ))
-                // token expires in 10 hours
                 .expiration(new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 10))
                 .signWith(getSignInKey(), Jwts.SIG.HS256)
                 .compact();
@@ -57,35 +54,25 @@ public class JwtUtil {
                 .getPayload();
     }
 
+    // ADDED: Method to get Role
+    public String getRole(String token) {
+        return getAllClaimsFromToken(token).get("role", String.class);
+    }
+
+    // ADDED: Method to get User ID
+    public String getUserId(String token) {
+        return getAllClaimsFromToken(token).get("userId", String.class);
+    }
+
     public boolean checkClaims(String token) {
-        Claims claims = getAllClaimsFromToken(token);
-
-        // check issuer
-        if (!"demo-spring-boot-backend".equals(claims.getIssuer())) {
-            log.error("Invalid token issuer");
+        try {
+            Claims claims = getAllClaimsFromToken(token);
+            if (!"demo-spring-boot-backend".equals(claims.getIssuer())) return false;
+            if (claims.getExpiration().before(getCurrentDate())) return false;
+            return claims.get("userId") != null && claims.get("role") != null;
+        } catch (Exception e) {
+            log.error("Token validation failed: {}", e.getMessage());
             return false;
         }
-
-        // check expiration
-        if (claims.getExpiration().before(getCurrentDate())) {
-            log.error("Token has expired");
-            return false;
-        }
-
-        // check iat
-        if (claims.getIssuedAt() == null || claims.getIssuedAt().after(getCurrentDate())) {
-            log.error("Token issued at date is invalid");
-            return false;
-        }
-
-        // check claims
-        if (claims.get("userId") == null || claims.get("role") == null) {
-            log.error("Token claims are invalid: does not contain userId and role");
-            return false;
-        }
-
-        log.info("Token is valid. User ID: {}, Role: {}",
-                claims.get("userId"), claims.get("role"));
-        return true;
     }
 }

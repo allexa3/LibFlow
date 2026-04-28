@@ -7,11 +7,15 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.jspecify.annotations.NonNull;
 
 import java.io.IOException;
+import java.util.List;
 
 @Component
 @Slf4j
@@ -23,14 +27,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        String method = request.getMethod();
-        boolean skip = "/login".equals(path)
-                || path.startsWith("/dev/")
-                || "OPTIONS".equalsIgnoreCase(method);
-        if (skip) {
-            log.debug("JwtAuthFilter skipping path={} method={}", path, method);
-        }
-        return skip;
+        return "/login".equals(path) || path.startsWith("/dev/") || "OPTIONS".equalsIgnoreCase(request.getMethod());
     }
 
     @Override
@@ -42,25 +39,30 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            log.warn("Missing or malformed Authorization header for {} {}",
-                    request.getMethod(), request.getRequestURI());
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            filterChain.doFilter(request, response);
             return;
         }
 
         String token = authHeader.substring(7);
 
         try {
-            boolean isValid = jwtUtil.checkClaims(token);
-            if (!isValid) {
-                log.warn("JWT claims validation failed for {} {}",
-                        request.getMethod(), request.getRequestURI());
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                return;
+            if (jwtUtil.checkClaims(token)) {
+                String userId = jwtUtil.getUserId(token);
+                String role = jwtUtil.getRole(token);
+
+                // Spring Security expects "ROLE_" prefix for hasRole() checks
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                        userId,
+                        null,
+                        List.of(new SimpleGrantedAuthority("ROLE_" + role))
+                );
+
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+                log.info("Authenticated user {} with role ROLE_{}", userId, role);
             }
             filterChain.doFilter(request, response);
         } catch (JwtException e) {
-            log.error("Invalid JWT token: {}", e.getMessage());
+            log.error("JWT Error: {}", e.getMessage());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         }
     }

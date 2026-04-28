@@ -45,17 +45,22 @@ public class PersonService {
         Person existingPerson = personRepository.findById(uuid)
                 .orElseThrow(() -> new ValidationException("Person with id " + uuid + " not found"));
 
-        Optional<Person> personWithEmail = personRepository.findByEmail(person.getEmail());
-        if (personWithEmail.isPresent() && !personWithEmail.get().getId().equals(uuid)) {
-            throw new ValidationException("Email " + person.getEmail() + " is already in use by another account.");
-        }
+        // Improved email uniqueness check
+        personRepository.findByEmail(person.getEmail()).ifPresent(p -> {
+            if (!p.getId().equals(uuid)) {
+                throw new RuntimeException("Email " + person.getEmail() + " is already in use by another account.");
+            }
+        });
 
         existingPerson.setName(person.getName());
         existingPerson.setAge(person.getAge());
         existingPerson.setEmail(person.getEmail());
         existingPerson.setRole(person.getRole());
-        String hashedPassword = passwordUtil.hashPassword(person.getPassword());
-        existingPerson.setPassword(hashedPassword);
+
+        // Only re-hash if a new password is provided
+        if (person.getPassword() != null && !person.getPassword().isEmpty()) {
+            existingPerson.setPassword(passwordUtil.hashPassword(person.getPassword()));
+        }
         return personRepository.save(existingPerson);
     }
 

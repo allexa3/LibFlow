@@ -15,7 +15,7 @@ public class BookCreateDTO {
     private String title;
 
     @NotBlank(message = "ISBN is required")
-    @Pattern(regexp = "^(978|979)[0-9]{10}$", message = "Invalid ISBN-13 format (e.g., 9781234567890)")
+    @Pattern(regexp = "^(978|979)[0-9]{10}$", message = "Invalid ISBN-13 format")
     private String isbn;
 
     // Fixed: 1:n relationship with Person
