@@ -13,6 +13,13 @@
         <mat-icon>category</mat-icon> Genres
       </a>
     </nav>
+
+    <span class="toolbar-spacer" aria-hidden="true"></span>
+    
+    <button mat-button type="button" (click)="logout()" aria-label="Sign out">
+      <mat-icon aria-hidden="true">logout</mat-icon>
+      Logout
+    </button>
   </div>
 </mat-toolbar>
 
@@ -31,7 +38,7 @@
   </header>
 
   @if (isLoading()) {
-  <p class="loading-status" role="status" aria-live="polite">Loading genres...</p>
+    <p class="loading-status" role="status" aria-live="polite">Loading genres...</p>
   }
 
   <div class="table-container" role="region" aria-label="Genre list" [attr.aria-busy]="isLoading()"

@@ -24,6 +24,8 @@ import {
 import { ConfirmDeleteDialogComponent } from '../../components/confirm-delete-dialog/confirm-delete-dialog.component';
 import { Book } from '../../models/book.model';
 import { BookListStore } from './book-list.store';
+import { LoginStore } from '../login/login.store'; // Added LoginStore
+import { Router } from '@angular/router';         // Added Router
 
 type SortField = 'title' | 'title_desc' | 'author' | 'isbn';
 type AvailabilityFilter = 'all' | 'available' | 'borrowed';
@@ -50,6 +52,8 @@ export class BookListPageComponent {
   private readonly dialog = inject(MatDialog);
   private readonly store = inject(BookListStore);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly loginStore = inject(LoginStore); // Injected
+  private readonly router = inject(Router);         // Injected
 
   protected readonly books = this.store.books;
   protected readonly isLoading = this.store.isLoading;
@@ -135,6 +139,11 @@ export class BookListPageComponent {
 
   constructor() {
     this.store.load();
+  }
+
+  protected logout(): void {
+    this.loginStore.logout();
+    void this.router.navigate(['/login']);
   }
 
   protected onSearchChange(event: Event): void {
