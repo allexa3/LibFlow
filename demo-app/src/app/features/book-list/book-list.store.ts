@@ -101,4 +101,26 @@ export class BookListStore {
         },
       });
   }
+
+  borrow(bookId: string): void {
+    this.beginRequest();
+    this.bookService
+      .borrow(bookId)
+      .pipe(finalize(() => this.endRequest()))
+      .subscribe({
+        next: (updated) => {
+          this.books.update((list) => list.map((b) => (b.id === bookId ? updated : b)));
+          this.notify.success(`You have successfully borrowed "${updated.title}".`);
+        },
+        error: (err: HttpErrorResponse) => {
+          // 400 with our custom ValidationException message
+          const body = err.error as { error?: string } | null;
+          if (body?.error) {
+            this.notify.error(body.error);
+          } else {
+            this.notify.parseAndShowError(err, 'Failed to borrow book. Please try again.');
+          }
+        },
+      });
+  }
 }

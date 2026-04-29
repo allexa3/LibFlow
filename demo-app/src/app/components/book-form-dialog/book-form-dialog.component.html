@@ -33,23 +33,23 @@
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Genres</mat-label>
       <mat-select formControlName="genreIds" multiple>
-      @for (genre of genres; track genre.id) {
-      <mat-option [value]="genre.id">{{ genre.name }}</mat-option>
-    }
+        @for (genre of genres; track genre.id) {
+          <mat-option [value]="genre.id">{{ genre.name }}</mat-option>
+        }
       </mat-select>
       @if (form.controls.genreIds.hasError('required')) {
-      <mat-error>Select at least one genre.</mat-error>
-    }
+        <mat-error>Select at least one genre.</mat-error>
+      }
     </mat-form-field>
 
     <mat-form-field appearance="fill">
-      <mat-label>Assign to Person</mat-label>
+      <mat-label>Assign to Person (optional)</mat-label>
       <mat-select formControlName="personId">
-      @for (person of people; track person.id) {
-        <mat-option [value]="person.id">{{person.name}}</mat-option>
-      }
-     </mat-select>
-       <mat-error>You must assign this book to a person</mat-error>
+        <mat-option [value]="''">— None —</mat-option>
+        @for (person of people; track person.id) {
+          <mat-option [value]="person.id">{{ person.name }}</mat-option>
+        }
+      </mat-select>
     </mat-form-field>
   </form>
 </mat-dialog-content>

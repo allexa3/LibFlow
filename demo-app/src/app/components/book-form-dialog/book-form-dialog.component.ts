@@ -20,7 +20,7 @@ export interface BookFormValue {
   title: string;
   authorName: string;
   isbn: string;
-  personId: string;
+  personId: string | null;
   genreIds: string[];
 }
 
@@ -59,7 +59,8 @@ export class BookFormDialogComponent implements OnInit {
     title: ['', [Validators.required, Validators.minLength(2)]],
     authorName: ['', [Validators.required]],
     isbn: ['', [Validators.required, Validators.pattern(/^(978|979)[0-9]{10}$/)]],
-    personId: ['', [Validators.required]],
+    // personId is optional — empty string means "no borrower"
+    personId: [''],
     genreIds: [[] as string[], [Validators.required]],
   });
 
@@ -81,7 +82,11 @@ export class BookFormDialogComponent implements OnInit {
       this.form.markAllAsTouched();
       return;
     }
-    const result: BookFormValue = this.form.getRawValue();
+    const raw = this.form.getRawValue();
+    const result: BookFormValue = {
+      ...raw,
+      personId: raw.personId || null,
+    };
     this.dialogRef.close(result);
   }
 

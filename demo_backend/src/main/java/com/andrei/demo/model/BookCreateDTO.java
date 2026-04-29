@@ -1,7 +1,6 @@
 package com.andrei.demo.model;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -18,8 +17,7 @@ public class BookCreateDTO {
     @Pattern(regexp = "^(978|979)[0-9]{10}$", message = "Invalid ISBN-13 format")
     private String isbn;
 
-    // Fixed: 1:n relationship with Person
-    @NotNull(message = "Person ID is required")
+    // Optional: a book can exist without a borrower
     private UUID personId;
 
     private String authorName;

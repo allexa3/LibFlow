@@ -38,12 +38,43 @@ public class BookService {
         book.setAuthorName(dto.getAuthorName());
         book.setIsbn(dto.getIsbn());
 
-        book.setBorrowedBy(personRepository.findById(dto.getPersonId())
-                .orElseThrow(() -> new ValidationException("Person not found")));
+        // personId is optional
+        if (dto.getPersonId() != null) {
+            book.setBorrowedBy(personRepository.findById(dto.getPersonId())
+                    .orElseThrow(() -> new ValidationException("Person not found")));
+        }
 
         if (dto.getGenreIds() != null && !dto.getGenreIds().isEmpty()) {
             book.setGenres(genreRepository.findAllById(dto.getGenreIds()));
         }
+
+        return bookRepository.save(book);
+    }
+
+    /**
+     * Allows a customer to borrow a book. Enforces:
+     *  - book must not already be borrowed
+     *  - customer may borrow at most 3 books
+     */
+    public Book borrowBook(UUID bookId, UUID personId) throws ValidationException {
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new ValidationException("Book not found"));
+
+        if (book.getBorrowedBy() != null) {
+            throw new ValidationException("This book is already borrowed.");
+        }
+
+        long borrowedCount = bookRepository.findAll().stream()
+                .filter(b -> b.getBorrowedBy() != null
+                        && b.getBorrowedBy().getId().equals(personId))
+                .count();
+
+        if (borrowedCount >= 3) {
+            throw new ValidationException("You have reached the maximum limit of 3 borrowed books.");
+        }
+
+        book.setBorrowedBy(personRepository.findById(personId)
+                .orElseThrow(() -> new ValidationException("Person not found")));
 
         return bookRepository.save(book);
     }
@@ -59,11 +90,14 @@ public class BookService {
                 case "authorName" -> book.setAuthorName((String) value);
                 case "isbn" -> book.setIsbn((String) value);
                 case "personId" -> {
-                    UUID pId = UUID.fromString(value.toString());
-                    book.setBorrowedBy(personRepository.findById(pId).orElse(null));
+                    if (value == null) {
+                        book.setBorrowedBy(null);
+                    } else {
+                        UUID pId = UUID.fromString(value.toString());
+                        book.setBorrowedBy(personRepository.findById(pId).orElse(null));
+                    }
                 }
                 case "genreIds" -> {
-                    // value arrives as List<String> from JSON
                     List<UUID> genreIds = ((List<?>) value).stream()
                             .map(v -> UUID.fromString(v.toString()))
                             .collect(Collectors.toList());
@@ -85,8 +119,15 @@ public class BookService {
         book.setTitle(dto.getTitle());
         book.setAuthorName(dto.getAuthorName());
         book.setIsbn(dto.getIsbn());
-        book.setBorrowedBy(personRepository.findById(dto.getPersonId())
-                .orElseThrow(() -> new ValidationException("Person not found")));
+
+        // personId is optional
+        if (dto.getPersonId() != null) {
+            book.setBorrowedBy(personRepository.findById(dto.getPersonId())
+                    .orElseThrow(() -> new ValidationException("Person not found")));
+        } else {
+            book.setBorrowedBy(null);
+        }
+
         if (dto.getGenreIds() != null && !dto.getGenreIds().isEmpty()) {
             book.setGenres(genreRepository.findAllById(dto.getGenreIds()));
         }

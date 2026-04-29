@@ -122,6 +122,13 @@
   border: 1px solid #a5d6a7;
 }
 
+.borrow-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85rem;
+}
+
 .filter-note {
   display: flex;
   align-items: center;

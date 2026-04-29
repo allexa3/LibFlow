@@ -6,6 +6,7 @@ import com.andrei.demo.model.BookCreateDTO;
 import com.andrei.demo.service.BookService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,7 +16,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/books")
 @AllArgsConstructor
-// Removed @CrossOrigin - CORS is handled globally by SecurityConfig
 public class BookController {
 
     private final BookService bookService;
@@ -48,5 +48,16 @@ public class BookController {
     @PutMapping("/{id}")
     public Book update(@PathVariable UUID id, @RequestBody @Valid BookCreateDTO dto) throws ValidationException {
         return bookService.update(id, dto);
+    }
+
+    /**
+     * Allows an authenticated customer to borrow an available book.
+     * The person ID is taken from the JWT token (set by JwtAuthFilter as the principal).
+     */
+    @PostMapping("/{id}/borrow")
+    public Book borrow(@PathVariable UUID id, Authentication authentication) throws ValidationException {
+        // The principal is the userId string set in JwtAuthFilter
+        String userId = (String) authentication.getPrincipal();
+        return bookService.borrowBook(id, UUID.fromString(userId));
     }
 }

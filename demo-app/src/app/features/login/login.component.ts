@@ -50,13 +50,12 @@ export class LoginComponent {
           return;
         }
 
-        // Read role directly from the response to avoid any signal-timing issues.
-        // The store's applyResponse() has already set the signals by this point,
-        // but using the response value is safer and more explicit.
         const role = response.role;
         if (role === 'ADMIN') {
+          // Admins land on people management
           void this.router.navigate(['/people']);
         } else {
+          // Customers land on the books browsing page
           void this.router.navigate(['/books']);
         }
       });

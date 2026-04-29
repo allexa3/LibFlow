@@ -2,17 +2,26 @@
   <div class="toolbar-content">
     <span class="brand">Library Admin</span>
 
-    <nav class="nav-links">
-      <a mat-button routerLink="/people" routerLinkActive="active-link">
-        <mat-icon>people</mat-icon> People
-      </a>
-      <a mat-button routerLink="/books" routerLinkActive="active-link">
-        <mat-icon>book</mat-icon> Books
-      </a>
-      <a mat-button routerLink="/genres" routerLinkActive="active-link">
-        <mat-icon>category</mat-icon> Genres
-      </a>
-    </nav>
+    @if (isAdmin()) {
+      <nav class="nav-links">
+        <a mat-button routerLink="/people" routerLinkActive="active-link">
+          <mat-icon>people</mat-icon> People
+        </a>
+        <a mat-button routerLink="/books" routerLinkActive="active-link">
+          <mat-icon>book</mat-icon> Books
+        </a>
+        <a mat-button routerLink="/genres" routerLinkActive="active-link">
+          <mat-icon>category</mat-icon> Genres
+        </a>
+      </nav>
+    } @else {
+      <nav class="nav-links">
+        <a mat-button routerLink="/books" routerLinkActive="active-link">
+          <mat-icon>book</mat-icon> Books
+        </a>
+      </nav>
+    }
+
     <span class="toolbar-spacer" aria-hidden="true"></span>
     <button mat-button type="button" (click)="logout()" aria-label="Sign out">
       <mat-icon aria-hidden="true">logout</mat-icon>
@@ -24,15 +33,26 @@
 <main class="content">
   <header class="page-header">
     <div>
-      <h1 class="page-title">Manage Books</h1>
-      <p class="page-subtitle">View, create, edit, and delete book records.</p>
+      <h1 class="page-title">
+        @if (isAdmin()) { Manage Books } @else { Available Books }
+      </h1>
+      <p class="page-subtitle">
+        @if (isAdmin()) {
+          View, create, edit, and delete book records.
+        } @else {
+          Browse available books and borrow up to 3 at a time.
+        }
+      </p>
     </div>
-    <div class="header-actions">
-      <button mat-flat-button (click)="openCreateDialog()" aria-label="Add new book" [disabled]="isLoading()">
-        <mat-icon>add</mat-icon>
-        New Book
-      </button>
-    </div>
+
+    @if (isAdmin()) {
+      <div class="header-actions">
+        <button mat-flat-button (click)="openCreateDialog()" aria-label="Add new book" [disabled]="isLoading()">
+          <mat-icon>add</mat-icon>
+          New Book
+        </button>
+      </div>
+    }
   </header>
 
   <!-- Search & Filter toolbar -->
@@ -48,14 +68,16 @@
       }
     </mat-form-field>
 
-    <mat-form-field appearance="outline" class="filter-field">
-      <mat-label>Filter by availability</mat-label>
-      <mat-select [value]="availabilityFilter()" (selectionChange)="onAvailabilityChange($event.value)">
-        <mat-option value="all">All</mat-option>
-        <mat-option value="available">Available</mat-option>
-        <mat-option value="borrowed">Borrowed</mat-option>
-      </mat-select>
-    </mat-form-field>
+    @if (isAdmin()) {
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Filter by availability</mat-label>
+        <mat-select [value]="availabilityFilter()" (selectionChange)="onAvailabilityChange($event.value)">
+          <mat-option value="all">All</mat-option>
+          <mat-option value="available">Available</mat-option>
+          <mat-option value="borrowed">Borrowed</mat-option>
+        </mat-select>
+      </mat-form-field>
+    }
 
     <mat-form-field appearance="outline" class="filter-field">
       <mat-label>Filter by genre</mat-label>
@@ -86,7 +108,7 @@
   </section>
 
   <p class="result-count" role="status" aria-live="polite">
-    Showing {{ filteredBooks().length }} of {{ books().length }} books
+    Showing {{ filteredBooks().length }} of {{ isAdmin() ? books().length : (books().length - books().filter(b => b.borrowedBy != null).length) }} books
     @if (hasActiveFilters()) {
       &nbsp;<em>(filtered)</em>
     }
@@ -131,6 +153,7 @@
         </td>
       </ng-container>
 
+      <!-- Admin-only: show who borrowed the book -->
       <ng-container matColumnDef="borrowedBy">
         <th mat-header-cell *matHeaderCellDef scope="col">Borrowed By</th>
         <td mat-cell *matCellDef="let book">
@@ -142,6 +165,7 @@
         </td>
       </ng-container>
 
+      <!-- Admin-only: edit / delete actions -->
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef scope="col">Actions</th>
         <td mat-cell *matCellDef="let book">
@@ -156,13 +180,34 @@
         </td>
       </ng-container>
 
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      <!-- Customer-only: borrow button -->
+      <ng-container matColumnDef="borrowAction">
+        <th mat-header-cell *matHeaderCellDef scope="col">Action</th>
+        <td mat-cell *matCellDef="let book">
+          <button
+            mat-flat-button
+            color="primary"
+            class="borrow-btn"
+            (click)="borrowBook(book)"
+            [disabled]="isLoading()"
+            [attr.aria-label]="'Borrow ' + book.title"
+          >
+            <mat-icon>bookmark_add</mat-icon>
+            Borrow
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns()"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns();"></tr>
 
       <tr class="mat-mdc-row" *matNoDataRow>
-        <td [attr.colspan]="displayedColumns.length" class="no-data-cell">
+        <td [attr.colspan]="displayedColumns().length" class="no-data-cell">
           @if (hasActiveFilters()) {
-            No books match your current filters. <button mat-button (click)="clearAllFilters()">Clear filters</button>
+            No books match your current filters.
+            <button mat-button (click)="clearAllFilters()">Clear filters</button>
+          } @else if (!isAdmin()) {
+            No books are currently available to borrow.
           } @else {
             No books found. Click "New Book" to add one.
           }
@@ -171,9 +216,11 @@
     </table>
   </div>
 
-  <p class="filter-note">
-    <mat-icon class="note-icon">info</mat-icon>
-    Filtering is performed on the <strong>frontend</strong> for a faster user experience,
-    since all book data is already loaded. This avoids extra round-trips for each filter change.
-  </p>
+  @if (isAdmin()) {
+    <p class="filter-note">
+      <mat-icon class="note-icon">info</mat-icon>
+      Filtering is performed on the <strong>frontend</strong> for a faster user experience,
+      since all book data is already loaded.
+    </p>
+  }
 </main>

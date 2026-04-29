@@ -23,4 +23,9 @@ export class BookService {
   delete(id: string): Observable<void> {
     return this.http.delete<void>(`${this.url}/${id}`);
   }
+
+  /** Customer borrows an available book — personId comes from the JWT on the backend */
+  borrow(bookId: string): Observable<Book> {
+    return this.http.post<Book>(`${this.url}/${bookId}/borrow`, {});
+  }
 }

@@ -24,8 +24,8 @@ import {
 import { ConfirmDeleteDialogComponent } from '../../components/confirm-delete-dialog/confirm-delete-dialog.component';
 import { Book } from '../../models/book.model';
 import { BookListStore } from './book-list.store';
-import { LoginStore } from '../login/login.store'; // Added LoginStore
-import { Router } from '@angular/router';         // Added Router
+import { LoginStore } from '../login/login.store';
+import { Router } from '@angular/router';
 
 type SortField = 'title' | 'title_desc' | 'author' | 'isbn';
 type AvailabilityFilter = 'all' | 'available' | 'borrowed';
@@ -52,13 +52,22 @@ export class BookListPageComponent {
   private readonly dialog = inject(MatDialog);
   private readonly store = inject(BookListStore);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly loginStore = inject(LoginStore); // Injected
-  private readonly router = inject(Router);         // Injected
+  private readonly loginStore = inject(LoginStore);
+  private readonly router = inject(Router);
 
   protected readonly books = this.store.books;
   protected readonly isLoading = this.store.isLoading;
   protected readonly hasError = this.store.hasError;
-  protected readonly displayedColumns = ['title', 'authorName', 'isbn', 'genres', 'borrowedBy', 'actions'];
+
+  /** True when the logged-in user is an ADMIN */
+  protected readonly isAdmin = computed(() => this.loginStore.role() === 'ADMIN');
+
+  /** Columns differ by role */
+  protected readonly displayedColumns = computed(() =>
+    this.isAdmin()
+      ? ['title', 'authorName', 'isbn', 'genres', 'borrowedBy', 'actions']
+      : ['title', 'authorName', 'isbn', 'genres', 'borrowAction'],
+  );
 
   // Filter & sort state
   protected readonly searchQuery = signal('');
@@ -66,7 +75,6 @@ export class BookListPageComponent {
   protected readonly genreFilter = signal<string>('all');
   protected readonly sortField = signal<SortField>('title');
 
-  /** Unique genre names extracted from all loaded books */
   protected readonly uniqueGenres = computed(() => {
     const names = new Set<string>();
     for (const book of this.books()) {
@@ -85,40 +93,37 @@ export class BookListPageComponent {
   );
 
   /**
-   * Filtering is done on the frontend.
-   * Justification: The full book list is already fetched on page load. Performing
-   * filtering client-side avoids additional HTTP round-trips on every keystroke or
-   * dropdown change, which would add latency and unnecessary server load. Since the
-   * dataset is small and fully in memory, frontend filtering is faster and provides
-   * instant feedback to the user.
+   * For customers: only available (unborrowed) books are shown.
+   * For admins: full list respecting all filter controls.
    */
   protected readonly filteredBooks = computed(() => {
     const query = this.searchQuery().trim().toLowerCase();
     const availability = this.availabilityFilter();
     const genre = this.genreFilter();
     const sort = this.sortField();
+    const admin = this.isAdmin();
 
     let result = this.books().filter((book) => {
-      // Filter criterion 1: search by title or author
+      // Customers only see available books regardless of filter setting
+      if (!admin && book.borrowedBy != null) return false;
+
       const matchesSearch =
         !query ||
         book.title.toLowerCase().includes(query) ||
         (book.authorName ?? '').toLowerCase().includes(query);
 
-      // Filter criterion 2: availability status
       const matchesAvailability =
+        !admin || // for customers this is already handled above
         availability === 'all' ||
         (availability === 'available' && !book.borrowedBy) ||
         (availability === 'borrowed' && !!book.borrowedBy);
 
-      // Filter criterion 3: genre
       const matchesGenre =
         genre === 'all' || (book.genres ?? []).some((g) => g.name === genre);
 
       return matchesSearch && matchesAvailability && matchesGenre;
     });
 
-    // Sort
     result = [...result].sort((a, b) => {
       switch (sort) {
         case 'title':
@@ -170,6 +175,10 @@ export class BookListPageComponent {
     this.searchQuery.set('');
     this.availabilityFilter.set('all');
     this.genreFilter.set('all');
+  }
+
+  protected borrowBook(book: Book): void {
+    this.store.borrow(book.id);
   }
 
   protected openCreateDialog(): void {
