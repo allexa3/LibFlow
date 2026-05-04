@@ -62,6 +62,14 @@ export class BookListPageComponent {
   /** True when the logged-in user is an ADMIN */
   protected readonly isAdmin = computed(() => this.loginStore.role() === 'ADMIN');
 
+  protected readonly currentUserId = this.loginStore.currentUserId;
+
+  protected readonly borrowedByMe = computed(() => {
+    const uid = this.currentUserId();
+    if (!uid) return [];
+    return this.books().filter((b) => b.borrowedBy?.id === uid);
+  });
+
   /** Columns differ by role */
   protected readonly displayedColumns = computed(() =>
     this.isAdmin()
@@ -113,7 +121,7 @@ export class BookListPageComponent {
         (book.authorName ?? '').toLowerCase().includes(query);
 
       const matchesAvailability =
-        !admin || // for customers this is already handled above
+        !admin ||
         availability === 'all' ||
         (availability === 'available' && !book.borrowedBy) ||
         (availability === 'borrowed' && !!book.borrowedBy);

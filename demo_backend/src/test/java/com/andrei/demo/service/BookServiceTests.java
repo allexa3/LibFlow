@@ -109,6 +109,7 @@ class BookServiceTests {
         when(bookRepository.findByIsbn(dto.getIsbn())).thenReturn(Optional.empty());
         when(personRepository.findById(personId)).thenReturn(Optional.of(person));
         when(genreRepository.findAllById(List.of(genreId))).thenReturn(List.of(genre));
+        when(bookRepository.findAll()).thenReturn(List.of());
         when(bookRepository.save(any(Book.class))).thenAnswer(inv -> inv.getArgument(0));
 
         Book result = bookService.create(dto);
@@ -118,6 +119,30 @@ class BookServiceTests {
         assertEquals(person, result.getBorrowedBy());
         assertEquals(1, result.getGenres().size());
         verify(bookRepository).save(any(Book.class));
+    }
+
+    @Test
+    void testCreate_BorrowLimitExceeded_ThrowsValidationException() {
+        UUID personId = UUID.randomUUID();
+        BookCreateDTO dto = new BookCreateDTO();
+        dto.setTitle("The Fourth Book");
+        dto.setAuthorName("Author");
+        dto.setIsbn("9780132350889");
+        dto.setPersonId(personId);
+
+        Person person = new Person();
+        person.setId(personId);
+
+        // Person already has 3 books
+        Book b1 = new Book(); b1.setBorrowedBy(person);
+        Book b2 = new Book(); b2.setBorrowedBy(person);
+        Book b3 = new Book(); b3.setBorrowedBy(person);
+
+        when(bookRepository.findByIsbn(dto.getIsbn())).thenReturn(Optional.empty());
+        when(bookRepository.findAll()).thenReturn(List.of(b1, b2, b3));
+
+        assertThrows(ValidationException.class, () -> bookService.create(dto));
+        verify(bookRepository, never()).save(any());
     }
 
     @Test
@@ -228,12 +253,44 @@ class BookServiceTests {
         when(bookRepository.findById(id)).thenReturn(Optional.of(existing));
         when(bookRepository.findByIsbn(dto.getIsbn())).thenReturn(Optional.empty());
         when(personRepository.findById(personId)).thenReturn(Optional.of(person));
+        when(bookRepository.findAll()).thenReturn(List.of());
         when(bookRepository.save(any(Book.class))).thenAnswer(inv -> inv.getArgument(0));
 
         Book result = bookService.update(id, dto);
 
         assertEquals("Updated Title", result.getTitle());
         assertEquals("New Author", result.getAuthorName());
+    }
+
+    @Test
+    void testUpdate_BorrowLimitExceeded_ThrowsValidationException() {
+        UUID id = UUID.randomUUID();
+        UUID personId = UUID.randomUUID();
+
+        Book existing = new Book();
+        existing.setId(id);
+        existing.setIsbn("9780132350884");
+
+        BookCreateDTO dto = new BookCreateDTO();
+        dto.setTitle("Updated");
+        dto.setAuthorName("Author");
+        dto.setIsbn("9780132350884");
+        dto.setPersonId(personId);
+
+        Person person = new Person();
+        person.setId(personId);
+
+        // Other books already owned by person
+        Book b1 = new Book(); b1.setBorrowedBy(person); b1.setId(UUID.randomUUID());
+        Book b2 = new Book(); b2.setBorrowedBy(person); b2.setId(UUID.randomUUID());
+        Book b3 = new Book(); b3.setBorrowedBy(person); b3.setId(UUID.randomUUID());
+
+        when(bookRepository.findById(id)).thenReturn(Optional.of(existing));
+        when(bookRepository.findByIsbn(dto.getIsbn())).thenReturn(Optional.empty());
+        when(bookRepository.findAll()).thenReturn(List.of(b1, b2, b3));
+
+        assertThrows(ValidationException.class, () -> bookService.update(id, dto));
+        verify(bookRepository, never()).save(any());
     }
 
     @Test

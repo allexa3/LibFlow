@@ -20,6 +20,19 @@ export class LoginStore {
   readonly isAuthenticated = computed(() => this.token() !== null);
   readonly role = signal<string | null>(null);
 
+  readonly currentUserId = computed(() => {
+    const t = this.token();
+    if (!t) return null;
+    try {
+      const parts = t.split('.');
+      if (parts.length < 2) return null;
+      const payload = JSON.parse(atob(parts[1]));
+      return (payload.userId as string) || null;
+    } catch {
+      return null;
+    }
+  });
+
   constructor() {
     this.restoreAuthState();
   }
@@ -45,7 +58,6 @@ export class LoginStore {
 
   private applyResponse(response: LoginResponse): void {
     if (response.success && response.token) {
-      // Set both signals synchronously so callers see the updated role immediately
       this.token.set(response.token);
       this.role.set(response.role ?? null);
       this.errorMessage.set(null);
@@ -58,7 +70,6 @@ export class LoginStore {
 
   private normalizeError(error: unknown): LoginResponse {
     if (error instanceof HttpErrorResponse) {
-      // Backend returned a structured LoginResponse with success=false
       const body = error.error as Partial<LoginResponse> | null;
       if (body && typeof body.success === 'boolean') {
         return {
@@ -73,7 +84,6 @@ export class LoginStore {
         };
       }
 
-      // Network error or unexpected shape
       if (error.status === 0) {
         return {
           success: false,

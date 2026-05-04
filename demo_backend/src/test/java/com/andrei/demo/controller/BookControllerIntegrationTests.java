@@ -112,6 +112,95 @@ public class BookControllerIntegrationTests {
     }
 
     @Test
+    void testCreateBook_BorrowLimitExceeded_ReturnsBadRequest() throws Exception {
+        // Create 3 books for that person
+        for (int i = 0; i < 3; i++) {
+            Map<String, Object> dto = Map.of(
+                    "title", "Borrowed Book " + i,
+                    "authorName", "Author",
+                    "isbn", "978000000000" + i,
+                    "personId", personId.toString(),
+                    "genreIds", new String[]{genreId.toString()}
+            );
+            mockMvc.perform(post("/books")
+                            .header("Authorization", "Bearer " + authToken)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(dto)))
+                    .andExpect(status().isOk());
+        }
+
+        // Now try to create a fourth book assigned to the same person
+        Map<String, Object> fourth = Map.of(
+                "title", "Borrowed Book 4",
+                "authorName", "Author",
+                "isbn", "9780000000004",
+                "personId", personId.toString(),
+                "genreIds", new String[]{genreId.toString()}
+        );
+
+        mockMvc.perform(post("/books")
+                        .header("Authorization", "Bearer " + authToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(fourth)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("You have reached the maximum limit of 3 borrowed books."));
+    }
+
+    @Test
+    void testUpdateBook_BorrowLimitExceeded_ReturnsBadRequest() throws Exception {
+        // Create 3 books for that person
+        for (int i = 0; i < 3; i++) {
+            Map<String, Object> dto = Map.of(
+                    "title", "Book " + i,
+                    "authorName", "Author",
+                    "isbn", "978111111111" + i,
+                    "personId", personId.toString(),
+                    "genreIds", new String[]{genreId.toString()}
+            );
+            mockMvc.perform(post("/books")
+                            .header("Authorization", "Bearer " + authToken)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(dto)))
+                    .andExpect(status().isOk());
+        }
+
+        // Create an unassigned book
+        Map<String, Object> unassigned = Map.of(
+                "title", "Unassigned Book",
+                "authorName", "Author",
+                "isbn", "9781111111114",
+                "genreIds", new String[]{genreId.toString()}
+        );
+
+        String unassignedJson = mockMvc.perform(post("/books")
+                        .header("Authorization", "Bearer " + authToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(unassigned)))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        String unassignedId = objectMapper.readTree(unassignedJson).get("id").asText();
+
+        // Update the unassigned book to be assigned to this person
+        Map<String, Object> updatePayload = Map.of(
+                "title", "Assigned now",
+                "authorName", "Author",
+                "isbn", "9781111111114",
+                "personId", personId.toString(),
+                "genreIds", new String[]{genreId.toString()}
+        );
+
+        mockMvc.perform(put("/books/" + unassignedId)
+                        .header("Authorization", "Bearer " + authToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updatePayload)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("You have reached the maximum limit of 3 borrowed books."));
+    }
+
+    @Test
     void testCreateBook_DuplicateIsbn_ReturnsBadRequest() throws Exception {
         Map<String, Object> dto = Map.of(
                 "title", "Book One",

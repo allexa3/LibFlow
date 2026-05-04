@@ -28,6 +28,19 @@ public class BookService {
                 .orElseThrow(() -> new ValidationException("Book not found"));
     }
 
+    private void validateBorrowLimit(UUID personId, UUID excludeBookId) throws ValidationException {
+        if (personId == null) return;
+        long borrowedCount = bookRepository.findAll().stream()
+                .filter(b -> b.getBorrowedBy() != null
+                        && b.getBorrowedBy().getId().equals(personId)
+                        && (excludeBookId == null || !b.getId().equals(excludeBookId)))
+                .count();
+
+        if (borrowedCount >= 3) {
+            throw new ValidationException("You have reached the maximum limit of 3 borrowed books.");
+        }
+    }
+
     public Book create(BookCreateDTO dto) throws ValidationException {
         if (bookRepository.findByIsbn(dto.getIsbn()).isPresent()) {
             throw new ValidationException("A book with this ISBN already exists.");
@@ -40,6 +53,7 @@ public class BookService {
 
         // personId is optional
         if (dto.getPersonId() != null) {
+            validateBorrowLimit(dto.getPersonId(), null);
             book.setBorrowedBy(personRepository.findById(dto.getPersonId())
                     .orElseThrow(() -> new ValidationException("Person not found")));
         }
@@ -53,8 +67,8 @@ public class BookService {
 
     /**
      * Allows a customer to borrow a book. Enforces:
-     *  - book must not already be borrowed
-     *  - customer may borrow at most 3 books
+     * - book must not already be borrowed
+     * - customer may borrow at most 3 books
      */
     public Book borrowBook(UUID bookId, UUID personId) throws ValidationException {
         Book book = bookRepository.findById(bookId)
@@ -64,14 +78,7 @@ public class BookService {
             throw new ValidationException("This book is already borrowed.");
         }
 
-        long borrowedCount = bookRepository.findAll().stream()
-                .filter(b -> b.getBorrowedBy() != null
-                        && b.getBorrowedBy().getId().equals(personId))
-                .count();
-
-        if (borrowedCount >= 3) {
-            throw new ValidationException("You have reached the maximum limit of 3 borrowed books.");
-        }
+        validateBorrowLimit(personId, bookId);
 
         book.setBorrowedBy(personRepository.findById(personId)
                 .orElseThrow(() -> new ValidationException("Person not found")));
@@ -84,7 +91,9 @@ public class BookService {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new ValidationException("Book not found"));
 
-        updates.forEach((key, value) -> {
+        for (Map.Entry<String, Object> entry : updates.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
             switch (key) {
                 case "title" -> book.setTitle((String) value);
                 case "authorName" -> book.setAuthorName((String) value);
@@ -94,6 +103,7 @@ public class BookService {
                         book.setBorrowedBy(null);
                     } else {
                         UUID pId = UUID.fromString(value.toString());
+                        validateBorrowLimit(pId, id);
                         book.setBorrowedBy(personRepository.findById(pId).orElse(null));
                     }
                 }
@@ -104,7 +114,7 @@ public class BookService {
                     book.setGenres(genreRepository.findAllById(genreIds));
                 }
             }
-        });
+        }
         return bookRepository.save(book);
     }
 
@@ -122,6 +132,7 @@ public class BookService {
 
         // personId is optional
         if (dto.getPersonId() != null) {
+            validateBorrowLimit(dto.getPersonId(), id);
             book.setBorrowedBy(personRepository.findById(dto.getPersonId())
                     .orElseThrow(() -> new ValidationException("Person not found")));
         } else {

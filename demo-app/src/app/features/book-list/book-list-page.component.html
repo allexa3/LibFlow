@@ -55,7 +55,6 @@
     }
   </header>
 
-  <!-- Search & Filter toolbar -->
   <section class="filter-bar" aria-label="Search and filter books">
     <mat-form-field appearance="outline" class="search-field">
       <mat-label>Search by title or author</mat-label>
@@ -153,7 +152,6 @@
         </td>
       </ng-container>
 
-      <!-- Admin-only: show who borrowed the book -->
       <ng-container matColumnDef="borrowedBy">
         <th mat-header-cell *matHeaderCellDef scope="col">Borrowed By</th>
         <td mat-cell *matCellDef="let book">
@@ -165,7 +163,6 @@
         </td>
       </ng-container>
 
-      <!-- Admin-only: edit / delete actions -->
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef scope="col">Actions</th>
         <td mat-cell *matCellDef="let book">
@@ -180,7 +177,6 @@
         </td>
       </ng-container>
 
-      <!-- Customer-only: borrow button -->
       <ng-container matColumnDef="borrowAction">
         <th mat-header-cell *matHeaderCellDef scope="col">Action</th>
         <td mat-cell *matCellDef="let book">
@@ -215,6 +211,49 @@
       </tr>
     </table>
   </div>
+
+  @if (!isAdmin()) {
+    <div style="margin-top: 32px;">
+      <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 16px;">Books you have borrowed</h2>
+      <div class="table-container" role="region" aria-label="Borrowed books list">
+        <table mat-table [dataSource]="borrowedByMe()" aria-label="Borrowed books table">
+
+          <ng-container matColumnDef="title">
+            <th mat-header-cell *matHeaderCellDef scope="col">Title</th>
+            <td mat-cell *matCellDef="let book">{{ book.title }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="authorName">
+            <th mat-header-cell *matHeaderCellDef scope="col">Author</th>
+            <td mat-cell *matCellDef="let book">{{ book.authorName }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="isbn">
+            <th mat-header-cell *matHeaderCellDef scope="col">ISBN</th>
+            <td mat-cell *matCellDef="let book">{{ book.isbn }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="genres">
+            <th mat-header-cell *matHeaderCellDef scope="col">Genres</th>
+            <td mat-cell *matCellDef="let book">
+              @for (genre of book.genres; track genre.id; let last = $last) {
+                {{ genre.name }}{{ !last ? ', ' : '' }}
+              }
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="['title', 'authorName', 'isbn', 'genres']"></tr>
+          <tr mat-row *matRowDef="let row; columns: ['title', 'authorName', 'isbn', 'genres'];"></tr>
+
+          <tr class="mat-mdc-row" *matNoDataRow>
+            <td colspan="4" class="no-data-cell">
+              You haven't borrowed any books yet.
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  }
 
   @if (isAdmin()) {
     <p class="filter-note">
