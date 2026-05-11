@@ -2,6 +2,7 @@ package com.andrei.demo.controller;
 
 import com.andrei.demo.config.ValidationException;
 import com.andrei.demo.model.PersonCreateDTO;
+import com.andrei.demo.model.PersonUpdateDTO;
 import com.andrei.demo.service.PersonService;
 import com.andrei.demo.model.Person;
 import jakarta.validation.Valid;
@@ -14,7 +15,6 @@ import java.util.UUID;
 
 @RestController
 @AllArgsConstructor
-// Removed @CrossOrigin - CORS is handled globally by SecurityConfig
 public class PersonController {
     private final PersonService personService;
 
@@ -39,11 +39,15 @@ public class PersonController {
         return personService.addPerson(personDTO);
     }
 
+    /**
+     * PUT update no longer accepts a password field.
+     * Password changes are handled exclusively via the forgot-password flow.
+     */
     @PutMapping("/person/{uuid}")
     public Person updatePerson(@PathVariable UUID uuid,
-                               @RequestBody Person person)
+                               @Valid @RequestBody PersonUpdateDTO dto)
             throws ValidationException {
-        return personService.updatePerson(uuid, person);
+        return personService.updatePerson(uuid, dto);
     }
 
     @DeleteMapping("/person/{uuid}")

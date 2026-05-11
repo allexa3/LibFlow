@@ -27,7 +27,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        return "/login".equals(path) || path.startsWith("/dev/") || "OPTIONS".equalsIgnoreCase(request.getMethod());
+        String method = request.getMethod();
+        return "/login".equals(path)
+                || path.startsWith("/dev/")
+                || path.startsWith("/password/")
+                || "OPTIONS".equalsIgnoreCase(method);
     }
 
     @Override
@@ -51,11 +55,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 String role = jwtUtil.getRole(token);
 
                 // Spring Security expects "ROLE_" prefix for hasRole() checks
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        userId,
-                        null,
-                        List.of(new SimpleGrantedAuthority("ROLE_" + role))
-                );
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(
+                                userId,
+                                null,
+                                List.of(new SimpleGrantedAuthority("ROLE_" + role))
+                        );
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
                 log.info("Authenticated user {} with role ROLE_{}", userId, role);

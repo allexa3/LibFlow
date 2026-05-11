@@ -3,6 +3,7 @@ package com.andrei.demo.service;
 import com.andrei.demo.config.ValidationException;
 import com.andrei.demo.model.Person;
 import com.andrei.demo.model.PersonCreateDTO;
+import com.andrei.demo.model.PersonUpdateDTO;
 import com.andrei.demo.model.UserRole;
 import com.andrei.demo.repository.PersonRepository;
 import com.andrei.demo.util.PasswordUtil;
@@ -11,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -24,60 +24,38 @@ public class PersonService {
         return personRepository.findAll();
     }
 
-
     public Person addPerson(PersonCreateDTO personDTO) throws ValidationException {
         if (personRepository.findByEmail(personDTO.getEmail()).isPresent()) {
             throw new ValidationException("Email " + personDTO.getEmail() + " is already in use.");
         }
         Person person = new Person();
-
         person.setName(personDTO.getName());
         person.setAge(personDTO.getAge());
         person.setEmail(personDTO.getEmail());
         person.setRole(personDTO.getRole());
-        String hashedPassword = passwordUtil.hashPassword(personDTO.getPassword());
-        person.setPassword(hashedPassword);
-
+        person.setPassword(passwordUtil.hashPassword(personDTO.getPassword()));
         return personRepository.save(person);
     }
 
-    public Person updatePerson(UUID uuid, Person person) throws ValidationException {
+    /**
+     * Updates name, age, email, and role. Password is NOT updated here.
+     * Password changes go through the forgot-password flow.
+     */
+    public Person updatePerson(UUID uuid, PersonUpdateDTO dto) throws ValidationException {
         Person existingPerson = personRepository.findById(uuid)
                 .orElseThrow(() -> new ValidationException("Person with id " + uuid + " not found"));
 
-        // Improved email uniqueness check
-        personRepository.findByEmail(person.getEmail()).ifPresent(p -> {
+        personRepository.findByEmail(dto.getEmail()).ifPresent(p -> {
             if (!p.getId().equals(uuid)) {
-                throw new RuntimeException("Email " + person.getEmail() + " is already in use by another account.");
+                throw new RuntimeException("Email " + dto.getEmail() + " is already in use by another account.");
             }
         });
 
-        existingPerson.setName(person.getName());
-        existingPerson.setAge(person.getAge());
-        existingPerson.setEmail(person.getEmail());
-        existingPerson.setRole(person.getRole());
-
-        // Only re-hash if a new password is provided
-        if (person.getPassword() != null && !person.getPassword().isEmpty()) {
-            existingPerson.setPassword(passwordUtil.hashPassword(person.getPassword()));
-        }
+        existingPerson.setName(dto.getName());
+        existingPerson.setAge(dto.getAge());
+        existingPerson.setEmail(dto.getEmail());
+        existingPerson.setRole(dto.getRole());
         return personRepository.save(existingPerson);
-    }
-
-    public Person updatePerson2(UUID uuid, Person person) throws ValidationException{
-        return personRepository
-                        .findById(uuid)
-                        .map(existingPerson -> {
-                            existingPerson.setName(person.getName());
-                            existingPerson.setAge(person.getAge());
-                            existingPerson.setEmail(person.getEmail());
-                            existingPerson.setPassword(person.getPassword());
-                            existingPerson.setRole(person.getRole());
-                            return personRepository.save(existingPerson);
-                        })
-                        .orElseThrow(
-                                () -> new ValidationException("Person with id " + uuid + " not found")
-                        );
     }
 
     public void deletePerson(UUID uuid) {
@@ -100,27 +78,18 @@ public class PersonService {
 
         updates.forEach((key, value) -> {
             switch (key) {
-                case "name":
-                    existingPerson.setName((String) value);
-                    break;
-                case "age":
-                    existingPerson.setAge((Integer) value);
-                    break;
-                case "email":
-                    // Basic check for duplicate email during patch
+                case "name" -> existingPerson.setName((String) value);
+                case "age" -> existingPerson.setAge((Integer) value);
+                case "email" -> {
                     String newEmail = (String) value;
                     if (!newEmail.equals(existingPerson.getEmail()) &&
                             personRepository.findByEmail(newEmail).isPresent()) {
                         throw new RuntimeException("Email " + newEmail + " is already in use.");
                     }
                     existingPerson.setEmail(newEmail);
-                    break;
-                case "password":
-                    existingPerson.setPassword((String) value);
-                    break;
-                case "role":
-                    existingPerson.setRole(UserRole.valueOf((String) value));
-                    break;
+                }
+                case "role" -> existingPerson.setRole(UserRole.valueOf((String) value));
+                // "password" key is intentionally ignored - use forgot-password flow
             }
         });
 

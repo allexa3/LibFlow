@@ -37,9 +37,27 @@ public class SecurityConfig {
                             response.setContentType("application/json");
                             response.getWriter().write("{\"error\": \"Unauthorized access\"}");
                         })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.setContentType("application/json");
+                            response.getWriter().write("{\"error\": \"Access denied: insufficient role\"}");
+                        })
                 )
                 .authorizeHttpRequests(auth -> auth
+                        // Public endpoints - no JWT required
                         .requestMatchers("/login").permitAll()
+                        .requestMatchers("/password/forgot", "/password/reset").permitAll()
+                        .requestMatchers("/dev/**").permitAll()
+
+                        // Admin-only endpoints
+                        .requestMatchers("/person/**").hasRole("ADMIN")
+                        .requestMatchers("/genre/**").hasRole("ADMIN")
+
+                        // Both ADMIN and CUSTOMER can access books
+                        // but borrow is customer-only (enforced in service via JWT principal)
+                        .requestMatchers("/books/**").hasAnyRole("ADMIN", "CUSTOMER")
+
+                        // Everything else requires authentication
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
