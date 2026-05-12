@@ -45,7 +45,6 @@ public class EmailService {
             log.info("Password change confirmation sent to {}", toEmail);
         } catch (Exception e) {
             log.error("Failed to send confirmation email to {}: {}", toEmail, e.getMessage());
-            // Non-fatal: password was already changed, just log the failure
         }
     }
 }

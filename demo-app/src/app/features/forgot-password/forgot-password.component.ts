@@ -102,7 +102,6 @@ export class ForgotPasswordComponent {
       });
   }
 
-  /** Step 2 submit: POST /password/reset */
   protected submitVerify(): void {
     if (this.verifyForm.invalid || this.isSubmitting()) {
       this.verifyForm.markAllAsTouched();

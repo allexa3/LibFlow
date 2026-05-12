@@ -1,11 +1,11 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, computed } from '@angular/core'; // Added computed
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, computed } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router'; // Added Router
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { ConfirmDeleteDialogComponent } from '../../components/confirm-delete-dialog/confirm-delete-dialog.component';
 import {
   GenreFormDialogComponent,
@@ -14,7 +14,7 @@ import {
 } from '../../components/genre-form-dialog/genre-form-dialog.component';
 import { Genre } from '../../models/genre.model';
 import { GenreListStore } from './genre-list.store';
-import { LoginStore } from '../login/login.store'; // Added LoginStore
+import { LoginStore } from '../login/login.store';
 
 @Component({
   selector: 'app-genre-list-page',
@@ -35,13 +35,12 @@ export class GenreListPageComponent {
   private readonly dialog = inject(MatDialog);
   private readonly store = inject(GenreListStore);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly loginStore = inject(LoginStore); // Injected
-  private readonly router = inject(Router);         // Injected
+  private readonly loginStore = inject(LoginStore);
+  private readonly router = inject(Router);
 
   protected readonly genres = this.store.genres;
   protected readonly isLoading = this.store.isLoading;
   
-  // Logic for role-based access if needed, similar to other pages
   protected readonly isAdmin = computed(() => this.loginStore.role() === 'ADMIN');
   protected readonly displayedColumns = ['name', 'actions'];
 
@@ -49,7 +48,6 @@ export class GenreListPageComponent {
     this.store.load();
   }
 
-  /** Restored Logout Functionality */
   protected logout(): void {
     this.loginStore.logout();
     void this.router.navigate(['/login']);

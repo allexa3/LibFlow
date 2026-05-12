@@ -16,7 +16,7 @@ import { LoginStore } from './login.store';
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    RouterModule, // Add this to enable routerLink
+    RouterModule,
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
@@ -54,10 +54,8 @@ export class LoginComponent {
 
         const role = response.role;
         if (role === 'ADMIN') {
-          // Admins land on people management
           void this.router.navigate(['/people']);
         } else {
-          // Customers land on the books browsing page
           void this.router.navigate(['/books']);
         }
       });

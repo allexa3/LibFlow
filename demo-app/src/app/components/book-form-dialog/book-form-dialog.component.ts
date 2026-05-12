@@ -59,7 +59,6 @@ export class BookFormDialogComponent implements OnInit {
     title: ['', [Validators.required, Validators.minLength(2)]],
     authorName: ['', [Validators.required]],
     isbn: ['', [Validators.required, Validators.pattern(/^(978|979)[0-9]{10}$/)]],
-    // personId is optional — empty string means "no borrower"
     personId: [''],
     genreIds: [[] as string[], [Validators.required]],
   });

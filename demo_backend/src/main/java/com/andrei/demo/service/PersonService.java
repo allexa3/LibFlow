@@ -37,10 +37,6 @@ public class PersonService {
         return personRepository.save(person);
     }
 
-    /**
-     * Updates name, age, email, and role. Password is NOT updated here.
-     * Password changes go through the forgot-password flow.
-     */
     public Person updatePerson(UUID uuid, PersonUpdateDTO dto) throws ValidationException {
         Person existingPerson = personRepository.findById(uuid)
                 .orElseThrow(() -> new ValidationException("Person with id " + uuid + " not found"));
@@ -89,7 +85,6 @@ public class PersonService {
                     existingPerson.setEmail(newEmail);
                 }
                 case "role" -> existingPerson.setRole(UserRole.valueOf((String) value));
-                // "password" key is intentionally ignored - use forgot-password flow
             }
         });
 

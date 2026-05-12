@@ -65,7 +65,6 @@ export class GenreListStore {
         this.notify.success(`Genre "${genre?.name ?? ''}" was deleted successfully.`);
       },
       error: (err: HttpErrorResponse) => {
-        // 409 or 500 from DataIntegrityViolationException when genre has books
         if (err.status === 409 || err.status === 500) {
           this.notify.error(
             `Cannot delete genre "${genre?.name ?? 'this genre'}" because it is still assigned to one or more books. ` +

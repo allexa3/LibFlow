@@ -59,7 +59,6 @@ export class BookListPageComponent {
   protected readonly isLoading = this.store.isLoading;
   protected readonly hasError = this.store.hasError;
 
-  /** True when the logged-in user is an ADMIN */
   protected readonly isAdmin = computed(() => this.loginStore.role() === 'ADMIN');
 
   protected readonly currentUserId = this.loginStore.currentUserId;
@@ -70,14 +69,12 @@ export class BookListPageComponent {
     return this.books().filter((b) => b.borrowedBy?.id === uid);
   });
 
-  /** Columns differ by role */
   protected readonly displayedColumns = computed(() =>
     this.isAdmin()
       ? ['title', 'authorName', 'isbn', 'genres', 'borrowedBy', 'actions']
       : ['title', 'authorName', 'isbn', 'genres', 'borrowAction'],
   );
 
-  // Filter & sort state
   protected readonly searchQuery = signal('');
   protected readonly availabilityFilter = signal<AvailabilityFilter>('all');
   protected readonly genreFilter = signal<string>('all');
@@ -100,10 +97,6 @@ export class BookListPageComponent {
       this.genreFilter() !== 'all',
   );
 
-  /**
-   * For customers: only available (unborrowed) books are shown.
-   * For admins: full list respecting all filter controls.
-   */
   protected readonly filteredBooks = computed(() => {
     const query = this.searchQuery().trim().toLowerCase();
     const availability = this.availabilityFilter();
@@ -112,7 +105,6 @@ export class BookListPageComponent {
     const admin = this.isAdmin();
 
     let result = this.books().filter((book) => {
-      // Customers only see available books regardless of filter setting
       if (!admin && book.borrowedBy != null) return false;
 
       const matchesSearch =

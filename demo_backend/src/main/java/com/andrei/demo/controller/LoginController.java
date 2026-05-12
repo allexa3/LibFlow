@@ -13,7 +13,6 @@ import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 @RestController
 @AllArgsConstructor
-// Removed @CrossOrigin - CORS is handled globally by SecurityConfig
 public class LoginController {
     private final SecurityService securityService;
 

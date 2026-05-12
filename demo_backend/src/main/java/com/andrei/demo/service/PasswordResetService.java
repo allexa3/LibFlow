@@ -27,10 +27,6 @@ public class PasswordResetService {
     private static final int CODE_LENGTH = 6;
     private static final int EXPIRY_MINUTES = 15;
 
-    /**
-     * Initiates a password reset: validates the email exists, generates a
-     * 6-digit code, persists it, and sends it via email.
-     */
     @Transactional
     public void initiateReset(String email) throws ValidationException {
         personRepository.findByEmail(email)
@@ -52,10 +48,6 @@ public class PasswordResetService {
         log.info("Password reset initiated for email: {}", email);
     }
 
-    /**
-     * Completes the password reset: validates code, updates the password,
-     * marks the token as used, and sends a confirmation email.
-     */
     @Transactional
     public void completeReset(String email, String code, String newPassword, String confirmPassword)
             throws ValidationException {
@@ -90,7 +82,6 @@ public class PasswordResetService {
 
         log.info("Password successfully reset for email: {}", email);
 
-        // Send confirmation notification (extra point requirement)
         emailService.sendPasswordChangedConfirmation(email);
     }
 

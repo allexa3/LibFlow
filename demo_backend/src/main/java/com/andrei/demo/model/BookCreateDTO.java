@@ -17,12 +17,10 @@ public class BookCreateDTO {
     @Pattern(regexp = "^(978|979)[0-9]{10}$", message = "Invalid ISBN-13 format")
     private String isbn;
 
-    // Optional: a book can exist without a borrower
     private UUID personId;
 
     private String authorName;
 
-    // For n:m relationship with Genres
     @Size(min = 1, message = "At least one genre must be selected")
     private List<UUID> genreIds;
 }

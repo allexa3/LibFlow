@@ -3,10 +3,6 @@ package com.andrei.demo.model;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
-/**
- * DTO for updating a person via PUT /person/{uuid}.
- * Password is intentionally excluded — use the forgot-password flow to change passwords.
- */
 @Data
 public class PersonUpdateDTO {
 

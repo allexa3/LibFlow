@@ -113,7 +113,6 @@ export class BookListStore {
           this.notify.success(`You have successfully borrowed "${updated.title}".`);
         },
         error: (err: HttpErrorResponse) => {
-          // 400 with our custom ValidationException message
           const body = err.error as { error?: string } | null;
           if (body?.error) {
             this.notify.error(body.error);

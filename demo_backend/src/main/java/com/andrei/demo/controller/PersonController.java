@@ -39,10 +39,6 @@ public class PersonController {
         return personService.addPerson(personDTO);
     }
 
-    /**
-     * PUT update no longer accepts a password field.
-     * Password changes are handled exclusively via the forgot-password flow.
-     */
     @PutMapping("/person/{uuid}")
     public Person updatePerson(@PathVariable UUID uuid,
                                @Valid @RequestBody PersonUpdateDTO dto)

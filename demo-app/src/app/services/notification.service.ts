@@ -28,10 +28,6 @@ export class NotificationService {
     this.show(message, 'error', 7000);
   }
 
-  /**
-   * Parses an HttpErrorResponse and returns a human-readable message.
-   * Handles validation maps, single-message objects, constraint violations, and generic errors.
-   */
   parseAndShowError(err: HttpErrorResponse, fallback = 'An unexpected error occurred.'): void {
     const msg = this.extractMessage(err, fallback);
     this.error(msg);
@@ -48,24 +44,20 @@ export class NotificationService {
 
     const body = err.error;
 
-    // Constraint violation (409 from DataIntegrityViolationException)
     if (err.status === 409) {
       if (body.error) return body.error;
       return 'This action cannot be completed because it would violate a database constraint. ' +
              'The record may be referenced by other data (e.g., a genre still assigned to books).';
     }
 
-    // Our custom ValidationException → { error: "..." }
     if (typeof body.error === 'string') {
       return body.error;
     }
 
-    // Our custom ValidationException → { message: "..." }
     if (typeof body.message === 'string') {
       return body.message;
     }
 
-    // Bean Validation → { field: "message", field2: "message2" }
     if (typeof body === 'object' && !Array.isArray(body)) {
       const entries = Object.entries(body) as [string, string][];
       if (entries.length > 0 && entries.every(([, v]) => typeof v === 'string')) {

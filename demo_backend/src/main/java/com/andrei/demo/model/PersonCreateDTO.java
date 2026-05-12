@@ -27,7 +27,6 @@ public class PersonCreateDTO {
     @Max(value = 200, message = "Age must be less than 200")
     private Integer age;
 
-    // In PersonCreateDTO.java - add @Email
     @Email(message = "Email must be valid")
     @NotBlank(message = "Email is required")
     private String email;

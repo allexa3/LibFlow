@@ -21,10 +21,6 @@ public class PasswordResetController {
 
     private final PasswordResetService passwordResetService;
 
-    /**
-     * Step 1: User submits their email to receive a reset code.
-     * Public endpoint - no JWT required.
-     */
     @PostMapping("/forgot")
     public ResponseEntity<Map<String, String>> forgotPassword(
             @Valid @RequestBody ForgotPasswordRequest request) throws ValidationException {
@@ -39,10 +35,6 @@ public class PasswordResetController {
                 "A reset code has been sent to your email address."));
     }
 
-    /**
-     * Step 2: User submits the code received by email along with the new password.
-     * Public endpoint - no JWT required.
-     */
     @PostMapping("/reset")
     public ResponseEntity<Map<String, String>> resetPassword(
             @Valid @RequestBody ResetPasswordRequest request) throws ValidationException {

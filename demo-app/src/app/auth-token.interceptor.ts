@@ -6,7 +6,6 @@ export const authTokenInterceptor: HttpInterceptorFn = (request, next) => {
   const loginStore = inject(LoginStore);
   const token = loginStore.token();
 
-  // Skip auth header for public endpoints — no token needed
   const isPublic =
     request.url.endsWith('/login') ||
     request.url.includes('/password/forgot') ||

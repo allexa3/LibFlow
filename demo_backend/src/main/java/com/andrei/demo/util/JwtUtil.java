@@ -54,12 +54,10 @@ public class JwtUtil {
                 .getPayload();
     }
 
-    // ADDED: Method to get Role
     public String getRole(String token) {
         return getAllClaimsFromToken(token).get("role", String.class);
     }
 
-    // ADDED: Method to get User ID
     public String getUserId(String token) {
         return getAllClaimsFromToken(token).get("userId", String.class);
     }

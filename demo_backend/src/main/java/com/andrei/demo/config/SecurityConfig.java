@@ -45,18 +45,14 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/login").permitAll()
-                        .requestMatchers("/password/**").permitAll() // Matches /password/forgot and /password/reset
+                        .requestMatchers("/password/**").permitAll()
                         .requestMatchers("/dev/**").permitAll()
 
-                        // Admin-only endpoints
                         .requestMatchers("/person/**").hasRole("ADMIN")
                         .requestMatchers("/genre/**").hasRole("ADMIN")
 
-                        // Both ADMIN and CUSTOMER can access books
-                        // but borrow is customer-only (enforced in service via JWT principal)
                         .requestMatchers("/books/**").hasAnyRole("ADMIN", "CUSTOMER")
 
-                        // Everything else requires authentication
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

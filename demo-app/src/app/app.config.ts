@@ -12,7 +12,7 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
     provideHttpClient(withInterceptors([authTokenInterceptor])),
-    provideAnimations(), // Required for Material Dialogs and SnackBar
-    NotificationService  // Ensure the notification service is available globally
+    provideAnimations(),
+    NotificationService
   ]
 };

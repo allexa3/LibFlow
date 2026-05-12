@@ -50,13 +50,8 @@ public class BookController {
         return bookService.update(id, dto);
     }
 
-    /**
-     * Allows an authenticated customer to borrow an available book.
-     * The person ID is taken from the JWT token (set by JwtAuthFilter as the principal).
-     */
     @PostMapping("/{id}/borrow")
     public Book borrow(@PathVariable UUID id, Authentication authentication) throws ValidationException {
-        // The principal is the userId string set in JwtAuthFilter
         String userId = (String) authentication.getPrincipal();
         return bookService.borrowBook(id, UUID.fromString(userId));
     }

@@ -55,7 +55,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 String userId = jwtUtil.getUserId(token);
                 String role = jwtUtil.getRole(token);
 
-                // Spring Security expects "ROLE_" prefix for hasRole() checks
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
                                 userId,

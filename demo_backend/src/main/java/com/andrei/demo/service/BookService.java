@@ -65,11 +65,6 @@ public class BookService {
         return bookRepository.save(book);
     }
 
-    /**
-     * Allows a customer to borrow a book. Enforces:
-     * - book must not already be borrowed
-     * - customer may borrow at most 3 books
-     */
     public Book borrowBook(UUID bookId, UUID personId) throws ValidationException {
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new ValidationException("Book not found"));
@@ -86,7 +81,6 @@ public class BookService {
         return bookRepository.save(book);
     }
 
-    @SuppressWarnings("unchecked")
     public Book patch(UUID id, Map<String, Object> updates) throws ValidationException {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new ValidationException("Book not found"));
@@ -130,7 +124,6 @@ public class BookService {
         book.setAuthorName(dto.getAuthorName());
         book.setIsbn(dto.getIsbn());
 
-        // personId is optional
         if (dto.getPersonId() != null) {
             validateBorrowLimit(dto.getPersonId(), id);
             book.setBorrowedBy(personRepository.findById(dto.getPersonId())
