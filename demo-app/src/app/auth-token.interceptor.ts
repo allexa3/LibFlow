@@ -6,7 +6,13 @@ export const authTokenInterceptor: HttpInterceptorFn = (request, next) => {
   const loginStore = inject(LoginStore);
   const token = loginStore.token();
 
-  if (!token || request.url.endsWith('/login')) {
+  // Skip auth header for public endpoints — no token needed
+  const isPublic =
+    request.url.endsWith('/login') ||
+    request.url.includes('/password/forgot') ||
+    request.url.includes('/password/reset');
+
+  if (!token || isPublic) {
     return next(request);
   }
 
@@ -18,4 +24,3 @@ export const authTokenInterceptor: HttpInterceptorFn = (request, next) => {
     }),
   );
 };
-
