@@ -44,9 +44,8 @@ public class SecurityConfig {
                         })
                 )
                 .authorizeHttpRequests(auth -> auth
-                        // Public endpoints - no JWT required
                         .requestMatchers("/login").permitAll()
-                        .requestMatchers("/password/forgot", "/password/reset").permitAll()
+                        .requestMatchers("/password/**").permitAll() // Matches /password/forgot and /password/reset
                         .requestMatchers("/dev/**").permitAll()
 
                         // Admin-only endpoints

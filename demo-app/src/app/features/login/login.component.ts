@@ -5,22 +5,24 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { LoginStore } from './login.store';
-
 @Component({
   selector: 'app-login',
+  standalone: true,
   imports: [
     ReactiveFormsModule,
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
+    RouterModule, // Add this to enable routerLink
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
+
 export class LoginComponent {
   private readonly formBuilder = inject(NonNullableFormBuilder);
   private readonly loginStore = inject(LoginStore);
