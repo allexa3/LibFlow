@@ -40,6 +40,15 @@ class GenreServiceTests {
         closeable.close();
     }
 
+    // ── helpers ─────────────────────────────────────────────────────────────
+
+    private Genre genreWithId(UUID id, String name) {
+        Genre g = new Genre();
+        g.setId(id);
+        g.setName(name);
+        return g;
+    }
+
     // ── getAll ──────────────────────────────────────────────────────────────
 
     @Test
@@ -53,14 +62,19 @@ class GenreServiceTests {
         verify(genreRepository).findAll();
     }
 
+    @Test
+    void testGetAll_EmptyList() {
+        when(genreRepository.findAll()).thenReturn(List.of());
+
+        assertTrue(genreService.getAll().isEmpty());
+    }
+
     // ── getById ─────────────────────────────────────────────────────────────
 
     @Test
     void testGetById_Found() throws ValidationException {
         UUID id = UUID.randomUUID();
-        Genre genre = new Genre();
-        genre.setId(id);
-        genre.setName("Fiction");
+        Genre genre = genreWithId(id, "Fiction");
         when(genreRepository.findById(id)).thenReturn(Optional.of(genre));
 
         Genre result = genreService.getById(id);
@@ -74,7 +88,9 @@ class GenreServiceTests {
         UUID id = UUID.randomUUID();
         when(genreRepository.findById(id)).thenReturn(Optional.empty());
 
-        assertThrows(ValidationException.class, () -> genreService.getById(id));
+        ValidationException ex = assertThrows(ValidationException.class,
+                () -> genreService.getById(id));
+        assertTrue(ex.getMessage().contains(id.toString()));
     }
 
     // ── create ──────────────────────────────────────────────────────────────
@@ -114,9 +130,7 @@ class GenreServiceTests {
     @Test
     void testUpdate_Success() throws ValidationException {
         UUID id = UUID.randomUUID();
-        Genre existing = new Genre();
-        existing.setId(id);
-        existing.setName("OldName");
+        Genre existing = genreWithId(id, "OldName");
 
         GenreCreateDTO dto = new GenreCreateDTO();
         dto.setName("NewName");
@@ -134,30 +148,25 @@ class GenreServiceTests {
     @Test
     void testUpdate_SameNameSameId_NoConflict() throws ValidationException {
         UUID id = UUID.randomUUID();
-        Genre existing = new Genre();
-        existing.setId(id);
-        existing.setName("Fiction");
+        Genre existing = genreWithId(id, "Fiction");
 
         GenreCreateDTO dto = new GenreCreateDTO();
         dto.setName("Fiction");
 
         when(genreRepository.findById(id)).thenReturn(Optional.of(existing));
-        // findByName returns the same genre (same ID) → no conflict
+        // findByName returns the same genre (same ID) — no conflict
         when(genreRepository.findByName("Fiction")).thenReturn(Optional.of(existing));
         when(genreRepository.save(any(Genre.class))).thenAnswer(inv -> inv.getArgument(0));
 
         assertDoesNotThrow(() -> genreService.update(id, dto));
+        verify(genreRepository).save(any(Genre.class));
     }
 
     @Test
     void testUpdate_NameTakenByOther_ThrowsRuntimeException() {
         UUID id = UUID.randomUUID();
-        Genre existing = new Genre();
-        existing.setId(id);
-        existing.setName("OldName");
-
-        Genre conflicting = new Genre();
-        conflicting.setId(UUID.randomUUID()); // different ID
+        Genre existing = genreWithId(id, "OldName");
+        Genre conflicting = genreWithId(UUID.randomUUID(), "Fiction");
 
         GenreCreateDTO dto = new GenreCreateDTO();
         dto.setName("Fiction");
@@ -183,9 +192,7 @@ class GenreServiceTests {
     @Test
     void testPatch_UpdatesName() throws ValidationException {
         UUID id = UUID.randomUUID();
-        Genre genre = new Genre();
-        genre.setId(id);
-        genre.setName("OldName");
+        Genre genre = genreWithId(id, "OldName");
 
         when(genreRepository.findById(id)).thenReturn(Optional.of(genre));
         when(genreRepository.findByName("NewName")).thenReturn(Optional.empty());
@@ -194,22 +201,58 @@ class GenreServiceTests {
         Genre result = genreService.patch(id, Map.of("name", "NewName"));
 
         assertEquals("NewName", result.getName());
+        verify(genreRepository).save(any(Genre.class));
+    }
+
+    @Test
+    void testPatch_SameNameSameId_NoConflict() throws ValidationException {
+        UUID id = UUID.randomUUID();
+        Genre genre = genreWithId(id, "Fiction");
+
+        when(genreRepository.findById(id)).thenReturn(Optional.of(genre));
+        when(genreRepository.findByName("Fiction")).thenReturn(Optional.of(genre));
+        when(genreRepository.save(any(Genre.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        assertDoesNotThrow(() -> genreService.patch(id, Map.of("name", "Fiction")));
+        verify(genreRepository).save(any(Genre.class));
     }
 
     @Test
     void testPatch_NameConflict_ThrowsRuntimeException() {
         UUID id = UUID.randomUUID();
-        Genre genre = new Genre();
-        genre.setId(id);
-        genre.setName("OldName");
-
-        Genre conflicting = new Genre();
-        conflicting.setId(UUID.randomUUID());
+        Genre genre = genreWithId(id, "OldName");
+        Genre conflicting = genreWithId(UUID.randomUUID(), "Fiction");
 
         when(genreRepository.findById(id)).thenReturn(Optional.of(genre));
         when(genreRepository.findByName("Fiction")).thenReturn(Optional.of(conflicting));
 
-        assertThrows(RuntimeException.class, () -> genreService.patch(id, Map.of("name", "Fiction")));
+        assertThrows(RuntimeException.class,
+                () -> genreService.patch(id, Map.of("name", "Fiction")));
+        verify(genreRepository, never()).save(any());
+    }
+
+    @Test
+    void testPatch_NoNameKey_SavesUnchanged() throws ValidationException {
+        UUID id = UUID.randomUUID();
+        Genre genre = genreWithId(id, "Unchanged");
+
+        when(genreRepository.findById(id)).thenReturn(Optional.of(genre));
+        when(genreRepository.save(any(Genre.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        // Patch with an unrecognised key — name should be untouched
+        Genre result = genreService.patch(id, Map.of());
+
+        assertEquals("Unchanged", result.getName());
+        verify(genreRepository).save(any(Genre.class));
+    }
+
+    @Test
+    void testPatch_NotFound_ThrowsValidationException() {
+        UUID id = UUID.randomUUID();
+        when(genreRepository.findById(id)).thenReturn(Optional.empty());
+
+        assertThrows(ValidationException.class,
+                () -> genreService.patch(id, Map.of("name", "X")));
     }
 
     // ── delete ──────────────────────────────────────────────────────────────
